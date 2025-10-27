@@ -8,39 +8,44 @@ import { ThemeType } from '../themes';
 import { auth } from '../config/firebase';
 import { signOut } from 'firebase/auth';
 
+// --- MUDANÇA: Importar useTranslation ---
+import { useTranslation } from 'react-i18next';
+
 export default function SobreNosScreen() {
+  // --- MUDANÇA: Inicializar useTranslation ---
+  const { t } = useTranslation();
+
   const nav = useNavigation<any>();
   const { theme, toggleTheme, isDarkMode } = useTheme();
   const styles = getStyles(theme);
 
-  useLayoutEffect(() => { 
-    nav.setOptions?.({ 
-      headerStyle: { backgroundColor: theme.header }, 
-      headerTintColor: theme.text 
-    }); 
+  useLayoutEffect(() => {
+    nav.setOptions?.({
+      headerStyle: { backgroundColor: theme.header },
+      headerTintColor: theme.text
+    });
   }, [nav, theme]);
-  
+
   const handleLogout = () => {
+    // --- MUDANÇA: Usar traduções para o Alert ---
+    // Reutilizando as chaves do drawer/alerts
       Alert.alert(
-          "Sair da Conta",
-          "Tem certeza que deseja sair?",
+          t('drawer.logoutAlertTitle'),
+          t('drawer.logoutAlertMessage'),
           [
-              { text: "Cancelar", style: "cancel" },
-              { 
-                text: "Sair", 
-                style: "destructive", 
-                onPress: async () => {
-                    try {
-                        await signOut(auth);
-                        nav.reset({
-                            index: 0,
-                            routes: [{ name: 'Login' }],
-                        });
-                    } catch (error) {
-                        console.error("Erro ao fazer logout:", error);
-                        Alert.alert("Erro", "Não foi possível sair.");
-                    }
-                }
+              { text: t('drawer.cancel'), style: "cancel" },
+              {
+                  text: t('drawer.confirmLogout'),
+                  style: "destructive",
+                  onPress: async () => {
+                      try {
+                          await signOut(auth);
+                          // A navegação agora é controlada pelo App.tsx
+                      } catch (error) {
+                          console.error("Erro ao fazer logout:", error);
+                          Alert.alert(t('alerts.errorTitle'), t('drawer.logoutError'));
+                      }
+                  }
               }
           ]
       )
@@ -48,32 +53,35 @@ export default function SobreNosScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Radar Motu</Text>
+      {/* --- MUDANÇA: Textos traduzidos --- */}
+      <Text style={styles.title}>{t('sobre.title')}</Text>
       <Text style={styles.paragraph}>
-        Este aplicativo foi desenvolvido como parte da disciplina de Mobile Application Development.
+        {t('sobre.paragraph')}
       </Text>
-      
+
       <TouchableOpacity style={styles.button} onPress={() => Linking.openURL('https://github.com/AntonioCarvalhoFIAP/challenge-3-ArthurBispo00/tree/main')}>
-        <Text style={styles.buttonText}>Ver no GitHub</Text>
+        <Text style={styles.buttonText}>{t('sobre.buttonGithub')}</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
         <Text style={styles.themeButtonText}>
-          Mudar para Tema {isDarkMode ? 'Claro' : 'Escuro'}
+          {/* Usando ternário para escolher a chave correta */}
+          {isDarkMode ? t('sobre.buttonThemeLight') : t('sobre.buttonThemeDark')}
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Sair (Logout)</Text>
+        <Text style={styles.logoutButtonText}>{t('sobre.buttonLogout')}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
+// Estilos (sem mudança)
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: {
-    flex: 1, 
-    backgroundColor: theme.background, 
+    flex: 1,
+    backgroundColor: theme.background,
     padding: 20
   },
   title: {
@@ -88,11 +96,11 @@ const getStyles = (theme: ThemeType) => StyleSheet.create({
     lineHeight: 24
   },
   button: {
-    marginTop: 20, 
-    backgroundColor: theme.primary, 
-    paddingVertical: 12, 
-    paddingHorizontal: 16, 
-    borderRadius: 8, 
+    marginTop: 20,
+    backgroundColor: theme.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     alignSelf: 'flex-start'
   },
   buttonText: {
@@ -101,11 +109,11 @@ const getStyles = (theme: ThemeType) => StyleSheet.create({
     fontSize: 15
   },
   themeButton: {
-    marginTop: 30, 
-    backgroundColor: theme.card, 
-    paddingVertical: 12, 
-    paddingHorizontal: 16, 
-    borderRadius: 8, 
+    marginTop: 30,
+    backgroundColor: theme.card,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     alignSelf: 'flex-start',
     borderWidth: 1,
     borderColor: theme.border,
@@ -124,7 +132,7 @@ const getStyles = (theme: ThemeType) => StyleSheet.create({
       alignSelf: 'flex-start'
   },
   logoutButtonText: {
-      color: theme.buttonTextDanger, 
+      color: theme.buttonTextDanger,
       fontWeight: 'bold',
       fontSize: 15
   }

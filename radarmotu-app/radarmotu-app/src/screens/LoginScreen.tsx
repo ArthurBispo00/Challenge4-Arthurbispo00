@@ -1,4 +1,5 @@
 // src/screens/LoginScreen.tsx
+// (Esta é a versão LIMPA, sem o seletor de idioma)
 
 import React from 'react';
 import {
@@ -12,13 +13,15 @@ import {
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import { useTheme } from '../contexts/ThemeContext'; // Importando hook de tema
+import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
-import { Feather } from '@expo/vector-icons'; // Usando a biblioteca de ícones do Expo
+import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next'; // A tradução ainda está aqui
 
 export default function LoginScreen({ navigation }: any) {
-  const { theme } = useTheme(); // Pegando as cores do tema atual
-  const styles = getStyles(theme); // Criando os estilos com base no tema
+  const { t } = useTranslation(); // O hook t() ainda é usado
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
 
   const [email, setEmail] = React.useState('');
   const [senha, setSenha] = React.useState('');
@@ -27,43 +30,44 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     if (!email || !senha) {
-      Alert.alert('Erro', 'Preencha todos os campos.');
+      Alert.alert(t('alerts.errorTitle'), t('alerts.fillAllFields'));
       return;
     }
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email, senha);
-      navigation.navigate('Home');
     } catch (error: any) {
-      let friendlyMessage = 'Ocorreu um erro. Tente novamente mais tarde.';
+      let friendlyMessage = t('alerts.genericError');
       switch (error.code) {
         case 'auth/invalid-credential':
         case 'auth/user-not-found':
         case 'auth/wrong-password':
-          friendlyMessage = 'Usuário ou senha incorretos.';
+          friendlyMessage = t('alerts.invalidCredentials');
           break;
         case 'auth/too-many-requests':
-          friendlyMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
+          friendlyMessage = t('alerts.tooManyRequests');
           break;
         case 'auth/network-request-failed':
-          friendlyMessage = 'Sem conexão com a internet. Verifique sua rede.';
+          friendlyMessage = t('alerts.networkError');
           break;
       }
-      Alert.alert('Erro de Login', friendlyMessage);
+      Alert.alert(t('alerts.loginErrorTitle'), friendlyMessage);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      {/* O seletor flutuante FOI REMOVIDO daqui */}
+
+      <Text style={styles.title}>{t('login.title')}</Text>
       <TextInput
-        placeholder="Email"
+        placeholder={t('login.emailPlaceholder')}
         style={styles.input}
         value={email}
         onChangeText={setEmail}
@@ -71,78 +75,98 @@ export default function LoginScreen({ navigation }: any) {
         autoCapitalize="none"
         placeholderTextColor={theme.placeholder}
       />
-      
       <View style={styles.passwordContainer}>
         <TextInput
-          placeholder="Senha"
+          placeholder={t('login.passwordPlaceholder')}
           style={styles.passwordInput}
           secureTextEntry={!isPasswordVisible}
           value={senha}
           onChangeText={setSenha}
           placeholderTextColor={theme.placeholder}
         />
-        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-          <Feather 
-            name={isPasswordVisible ? "eye-off" : "eye"} 
-            size={22} 
-            color={theme.inactive} 
+        <TouchableOpacity
+          onPress={togglePasswordVisibility}
+          style={styles.eyeIcon}
+        >
+          <Feather
+            name={isPasswordVisible ? 'eye-off' : 'eye'}
+            size={22}
+            color={theme.inactive}
           />
         </TouchableOpacity>
       </View>
-      
+
       {loading ? (
         <ActivityIndicator size="large" color={theme.primary} />
       ) : (
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
+          <Text style={styles.buttonText}>{t('login.loginButton')}</Text>
         </TouchableOpacity>
       )}
       <TouchableOpacity onPress={() => navigation.navigate('CadastroUsuario')}>
-        <Text style={styles.link}>Não tem conta? Cadastre-se</Text>
+        <Text style={styles.link}>{t('login.signupLink')}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const getStyles = (theme: ThemeType) => StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: theme.background },
-  title: { fontSize: 26, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: theme.text },
-  input: {
-    backgroundColor: theme.card,
-    color: theme.text,
-    borderWidth: 1,
-    borderColor: theme.border,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    marginBottom: 12,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.card,
-    borderWidth: 1,
-    borderColor: theme.border,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: theme.text,
-  },
-  eyeIcon: {
-    padding: 10,
-  },
-  button: {
-    backgroundColor: theme.primary,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: { color: theme.buttonTextPrimary, fontWeight: 'bold' },
-  link: { marginTop: 15, textAlign: 'center', color: theme.primary, fontWeight: '600' },
-});
+// Estilos (versão limpa, sem os estilos do seletor)
+const getStyles = (theme: ThemeType) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      padding: 20,
+      backgroundColor: theme.background,
+    },
+    title: {
+      fontSize: 26,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      textAlign: 'center',
+      color: theme.text,
+    },
+    input: {
+      backgroundColor: theme.card,
+      color: theme.text,
+      borderWidth: 1,
+      borderColor: theme.border,
+      paddingHorizontal: 15,
+      paddingVertical: 12,
+      marginBottom: 12,
+      borderRadius: 8,
+      fontSize: 16,
+    },
+    passwordContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.card,
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 8,
+      marginBottom: 12,
+    },
+    passwordInput: {
+      flex: 1,
+      paddingHorizontal: 15,
+      paddingVertical: 12,
+      fontSize: 16,
+      color: theme.text,
+    },
+    eyeIcon: {
+      padding: 10,
+    },
+    button: {
+      backgroundColor: theme.primary,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    buttonText: { color: theme.buttonTextPrimary, fontWeight: 'bold' },
+    link: {
+      marginTop: 15,
+      textAlign: 'center',
+      color: theme.primary,
+      fontWeight: '600',
+    },
+  });

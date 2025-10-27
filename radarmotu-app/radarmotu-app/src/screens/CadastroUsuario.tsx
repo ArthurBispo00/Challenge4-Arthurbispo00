@@ -15,7 +15,13 @@ import { auth } from "../config/firebase";
 import { useTheme } from "../contexts/ThemeContext";
 import { ThemeType } from "../themes";
 
+// --- MUDANÇA: Importar o hook de tradução ---
+import { useTranslation } from "react-i18next";
+
 export default function CadastroUsuario({ navigation }: any) {
+  // --- MUDANÇA: Inicializar o hook ---
+  const { t } = useTranslation();
+
   const { theme } = useTheme();
   const styles = getStyles(theme);
 
@@ -25,28 +31,29 @@ export default function CadastroUsuario({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   const handleCadastro = async () => {
+    // --- MUDANÇA: Usar traduções para alertas ---
     if (!email || !senha || !confirmarSenha) {
-      Alert.alert("Erro", "Preencha todos os campos.");
+      Alert.alert(t('alerts.errorTitle'), t('alerts.fillAllFields'));
       return;
     }
     if (senha !== confirmarSenha) {
-      Alert.alert("Erro", "As senhas não coincidem.");
+      Alert.alert(t('alerts.errorTitle'), t('cadastroUsuario.passwordsNoMatch'));
       return;
     }
 
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, senha);
-      Alert.alert("Sucesso", "Conta criada com sucesso!");
+      Alert.alert(t('alerts.successTitle'), t('cadastroUsuario.accountCreated'));
       navigation.navigate("Login");
       
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
-        Alert.alert("Erro no Cadastro", "Este e-mail já foi cadastrado por outro usuário.");
+        Alert.alert(t('cadastroUsuario.errorTitle'), t('cadastroUsuario.emailInUse'));
       } else if (error.code === 'auth/weak-password') {
-        Alert.alert("Erro no Cadastro", "A senha é muito fraca. Tente uma com pelo menos 6 caracteres.");
+        Alert.alert(t('cadastroUsuario.errorTitle'), t('cadastroUsuario.weakPassword'));
       } else {
-        Alert.alert("Erro no Cadastro", "Ocorreu um erro. Verifique os dados e tente novamente.");
+        Alert.alert(t('cadastroUsuario.errorTitle'), t('cadastroUsuario.checkDataError'));
       }
     } finally {
       setLoading(false);
@@ -55,9 +62,10 @@ export default function CadastroUsuario({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cadastro de Usuário</Text>
+      {/* --- MUDANÇA: Textos e Placeholders traduzidos --- */}
+      <Text style={styles.title}>{t('cadastroUsuario.title')}</Text>
       <TextInput
-        placeholder="Email"
+        placeholder={t('login.emailPlaceholder')} // Reutilizando a tradução do login
         style={styles.input}
         value={email}
         onChangeText={setEmail}
@@ -66,7 +74,7 @@ export default function CadastroUsuario({ navigation }: any) {
         placeholderTextColor={theme.placeholder}
       />
       <TextInput
-        placeholder="Senha"
+        placeholder={t('login.passwordPlaceholder')} // Reutilizando a tradução do login
         style={styles.input}
         secureTextEntry
         value={senha}
@@ -74,7 +82,7 @@ export default function CadastroUsuario({ navigation }: any) {
         placeholderTextColor={theme.placeholder}
       />
       <TextInput
-        placeholder="Confirmar Senha"
+        placeholder={t('cadastroUsuario.placeholderConfirmPassword')}
         style={styles.input}
         secureTextEntry
         value={confirmarSenha}
@@ -85,16 +93,17 @@ export default function CadastroUsuario({ navigation }: any) {
         <ActivityIndicator size="large" color={theme.primary} />
       ) : (
         <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-          <Text style={styles.buttonText}>Cadastrar</Text>
+          <Text style={styles.buttonText}>{t('cadastroUsuario.buttonRegister')}</Text>
         </TouchableOpacity>
       )}
       <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text style={styles.link}>Já tem conta? Faça login</Text>
+        <Text style={styles.link}>{t('cadastroUsuario.linkLogin')}</Text>
       </TouchableOpacity>
     </View> 
   );
 }
 
+// Estilos (sem mudança)
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: theme.background },
   title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: theme.text },

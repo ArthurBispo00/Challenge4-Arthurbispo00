@@ -9,6 +9,8 @@ import { DrawerParamList } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
 
+// --- MUDANÇA: Importar o hook de tradução ---
+import { useTranslation } from 'react-i18next';
 
 interface Veiculo {
   placa: string; marca: string; modelo: string; cor: string;
@@ -18,6 +20,9 @@ interface Veiculo {
 type ListagemScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'ListarVeiculos'>;
 
 export default function Listagem() {
+  // --- MUDANÇA: Inicializar o hook ---
+  const { t } = useTranslation();
+
   const navigation = useNavigation<ListagemScreenNavigationProp>();
   const { theme } = useTheme();
   const styles = getStyles(theme);
@@ -37,13 +42,13 @@ export default function Listagem() {
   async function carregarVeiculos() {
     setIsLoading(true);
     try {
-    
       const listaVeiculosJson = await AsyncStorage.getItem('@lista_veiculos');
       const listaVeiculos = listaVeiculosJson ? JSON.parse(listaVeiculosJson) : [];
       setVeiculos(listaVeiculos);
     } catch (error) {
       console.error('Erro ao carregar os veículos:', error);
-      Alert.alert("Erro", "Não foi possível buscar os veículos.");
+      // --- MUDANÇA: Usar tradução para alerta ---
+      Alert.alert(t('alerts.errorTitle'), t('listagem.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -51,19 +56,21 @@ export default function Listagem() {
 
   async function handleDelete(placa: string) {
     Alert.alert(
-      "Confirmar Exclusão", `Tem certeza que deseja excluir o veículo ${placa}?`,
+      // --- MUDANÇA: Usar traduções para alerta de confirmação ---
+      t('listagem.deleteTitle'), 
+      t('listagem.deleteMessage', { placa: placa }), // Passando a placa para a tradução
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t('drawer.cancel'), style: "cancel" }, // Reutilizando a tradução do drawer
         { 
-          text: "Excluir", 
+          text: t('listagem.deleteButton'), 
           style: "destructive", 
           onPress: async () => {
             try {
               // await deleteVehicle(placa); // TODO: Descomentar para API .NET
-              Alert.alert("Sucesso", "Veículo excluído.");
+              Alert.alert(t('alerts.successTitle'), t('listagem.deleteSuccess'));
               carregarVeiculos();
             } catch (error) {
-              Alert.alert("Erro", "Não foi possível excluir o veículo.");
+              Alert.alert(t('alerts.errorTitle'), t('listagem.deleteError'));
             }
           }
         }
@@ -73,23 +80,24 @@ export default function Listagem() {
 
   const renderItem = ({ item }: { item: Veiculo }) => (
     <View style={styles.itemContainer}>
+      {/* --- MUDANÇA: Usar traduções para labels --- */}
       <Text style={styles.itemTitle}>{item.placa} - {item.modelo}</Text>
-      <Text style={styles.itemText}>Marca: {item.marca}</Text>
-      <Text style={styles.itemText}>Cor: {item.cor}</Text>
-      <Text style={styles.itemText}>Ano: {item.anoFabricacao}/{item.anoModelo}</Text>
-      <Text style={styles.itemText}>Chassi: {item.chassi}</Text>
+      <Text style={styles.itemText}>{t('listagem.labelBrand')}: {item.marca}</Text>
+      <Text style={styles.itemText}>{t('listagem.labelColor')}: {item.cor}</Text>
+      <Text style={styles.itemText}>{t('listagem.labelYear')}: {item.anoFabricacao}/{item.anoModelo}</Text>
+      <Text style={styles.itemText}>{t('listagem.labelVin')}: {item.chassi}</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
           style={styles.editButton} 
           onPress={() => navigation.navigate('CadastrarVeiculo', { veiculo: item } as any)}
         >
-          <Text style={styles.editButtonText}>Editar</Text>
+          <Text style={styles.editButtonText}>{t('listagem.buttonEdit')}</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.deleteButton}
           onPress={() => handleDelete(item.placa)}
         >
-          <Text style={styles.deleteButtonText}>Excluir</Text>
+          <Text style={styles.deleteButtonText}>{t('listagem.deleteButton')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -99,14 +107,16 @@ export default function Listagem() {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color={theme.primary} />
-        <Text style={styles.loadingText}>Carregando Veículos...</Text>
+        {/* --- MUDANÇA: Usar tradução para texto de loading --- */}
+        <Text style={styles.loadingText}>{t('listagem.loading')}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Veículos Cadastrados</Text>
+      {/* --- MUDANÇA: Usar tradução para título --- */}
+      <Text style={styles.heading}>{t('listagem.title')}</Text>
       <FlatList
         data={veiculos}
         keyExtractor={(item, index) => item.placa + index}
@@ -114,18 +124,21 @@ export default function Listagem() {
         contentContainerStyle={styles.listContentContainer}
         ListEmptyComponent={
           <View style={styles.emptyListComponent}>
-            <Text style={styles.emptyListText}>Nenhum veículo cadastrado ainda.</Text>
-            <Text style={styles.emptyListSubText}>Vá para a tela de cadastro para adicionar.</Text>
+            {/* --- MUDANÇA: Usar traduções para lista vazia --- */}
+            <Text style={styles.emptyListText}>{t('listagem.emptyList')}</Text>
+            <Text style={styles.emptyListSubText}>{t('listagem.emptyListSub')}</Text>
           </View>
         }
       />
       <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={() => navigation.navigate('CadastrarVeiculo')}>
-        <Text style={[styles.buttonText, styles.secondaryButtonText]}>Cadastrar Novo Veículo</Text>
+        {/* --- MUDANÇA: Usar tradução para botão --- */}
+        <Text style={[styles.buttonText, styles.secondaryButtonText]}>{t('listagem.buttonNew')}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
+// Estilos (sem mudança)
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 15, paddingTop: 20, paddingBottom: 10, backgroundColor: theme.background },
   loadingContainer: { justifyContent: 'center', alignItems: 'center' },

@@ -1,9 +1,10 @@
 // App.tsx
-
+import './src/i18n'; // Import síncrono (CORRETO)
 import "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
-import { View, Image, Text, StyleSheet, Alert, ActivityIndicator } from "react-native";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { View, Image, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import {
   createDrawerNavigator,
   DrawerContentComponentProps,
@@ -13,9 +14,10 @@ import {
 } from "@react-navigation/drawer";
 import { ThemeProvider, useTheme } from "./src/contexts/ThemeContext";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next'; // Importado aqui
 
 // Firebase
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth } from "./src/config/firebase";
 
 // --- Telas ---
@@ -30,9 +32,12 @@ import OperacoesPorPlaca from "./src/screens/OperacoesPorPlaca";
 import RadarProximidade from "./src/screens/RadarProximidade";
 
 // --- Tipagem ---
-export type DrawerParamList = {
+export type AuthStackParamList = {
   Login: undefined;
   CadastroUsuario: undefined;
+};
+
+export type MainDrawerParamList = {
   Home: undefined;
   OperacoesPorPlaca: undefined;
   CadastrarVeiculo: undefined;
@@ -42,57 +47,44 @@ export type DrawerParamList = {
   Sobre: undefined;
 };
 
-const Drawer = createDrawerNavigator<DrawerParamList>();
+const Stack = createStackNavigator<AuthStackParamList>();
+const Drawer = createDrawerNavigator<MainDrawerParamList>();
 
-// --- Componente Principal de Navegação ---
-function AppNavigator() {
+// --- Navegador de Autenticação ---
+function AuthNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="CadastroUsuario" component={CadastroUsuario} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+}
+
+// --- Navegador Principal (Drawer) ---
+function MainNavigator() {
   const { theme } = useTheme();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user);
-      setLoading(false);
-    });
-    return unsubscribe;
-  }, []);
+  // --- CORREÇÃO: Chamamos o hook 't' aqui ---
+  const { t } = useTranslation();
 
   const CustomDrawerContent = (props: DrawerContentComponentProps) => {
-
-    const filteredRoutes = props.state.routes.filter((route) => {
-      const authRoutes = ["Login", "CadastroUsuario"];
-      return isLoggedIn ? !authRoutes.includes(route.name) : authRoutes.includes(route.name);
-    });
-
-    const currentRouteName = props.state.routes[props.state.index]?.name;
-    let newIndex = filteredRoutes.findIndex(route => route.name === currentRouteName);
-    if (newIndex === -1) { newIndex = 0; }
-
-    const newProps = { ...props, state: { ...props.state, routes: filteredRoutes, index: newIndex } };
-
-    
+    // O 't' e 'i18n' para o conteúdo interno do Drawer continuam aqui
+    const { t, i18n } = useTranslation();
     const currentYear = new Date().getFullYear();
+    const changeLangToPt = () => i18n.changeLanguage('pt');
+    const changeLangToEs = () => i18n.changeLanguage('es');
 
     const handleLogout = () => {
         Alert.alert(
-            "Sair da Conta", "Tem certeza que deseja sair?",
+            t('drawer.logoutAlertTitle'), t('drawer.logoutAlertMessage'),
             [
-                { text: "Cancelar", style: "cancel" },
-                { 
-                  text: "Sair", 
-                  style: "destructive", 
-                  onPress: async () => {
-                      try {
-                          await signOut(auth);
-                          props.navigation.reset({
-                              index: 0,
-                              routes: [{ name: 'Login' }],
-                          });
-                      } catch (error) {
-                          Alert.alert("Erro", "Não foi possível sair.");
-                      }
-                  }
+                { text: t('drawer.cancel'), style: "cancel" },
+                {
+                    text: t('drawer.confirmLogout'),
+                    style: "destructive",
+                    onPress: async () => {
+                        try { await signOut(auth); }
+                        catch (error) { Alert.alert(t('alerts.errorTitle'), t('drawer.logoutError')); }
+                    }
                 }
             ]
         )
@@ -100,21 +92,29 @@ function AppNavigator() {
 
     return (
       <View style={{ flex: 1, backgroundColor: theme.card }}>
-        <DrawerContentScrollView {...newProps} contentContainerStyle={{ paddingTop: 0 }}>
+        <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
           <View style={[styles.drawerHeader, { backgroundColor: theme.header }]}>
             <Image source={require("./assets/radarmotu-logo.png")} style={styles.drawerLogo} />
           </View>
-          <DrawerItemList {...newProps} />
-          {isLoggedIn && (
-            <DrawerItem
-              label="Sair"
-              labelStyle={{ color: theme.text, fontWeight: 'bold' }}
-              icon={({ color, size }) => (
-                <MaterialCommunityIcons name="logout" color={theme.text} size={size} />
-              )}
-              onPress={handleLogout}
-            />
-          )}
+
+          {/* Seletor de Idioma (correto) */}
+          <View style={[styles.languageSwitcher, { borderBottomColor: theme.border }]}>
+            <TouchableOpacity onPress={changeLangToPt}>
+              <Text style={[styles.langButton, { color: theme.inactive }, i18n.language === 'pt' && [styles.langButtonActive, { color: theme.primary }]]}>PT</Text>
+            </TouchableOpacity>
+            <Text style={[styles.langSeparator, { color: theme.border }]}>|</Text>
+            <TouchableOpacity onPress={changeLangToEs}>
+              <Text style={[styles.langButton, { color: theme.inactive }, i18n.language === 'es' && [styles.langButtonActive, { color: theme.primary }]]}>ES</Text>
+            </TouchableOpacity>
+          </View>
+
+          <DrawerItemList {...props} />
+          <DrawerItem
+            label={t('drawer.logoutButton')}
+            labelStyle={{ color: theme.text, fontWeight: 'bold' }}
+            icon={({ color, size }) => ( <MaterialCommunityIcons name="logout" color={theme.text} size={size} /> )}
+            onPress={handleLogout}
+          />
         </DrawerContentScrollView>
         <View style={[styles.drawerFooter, { backgroundColor: theme.header, borderTopColor: theme.border }]}>
           <Image source={require("./assets/metamind-logo.png")} style={styles.drawerFooterLogo} />
@@ -125,46 +125,63 @@ function AppNavigator() {
     );
   };
 
-  if (loading) {
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background}}>
-        <ActivityIndicator size="large" color={theme.primary} />
-      </View>
-    );
-  }
-
   return (
     <Drawer.Navigator
-      initialRouteName={isLoggedIn ? "Home" : "Login"}
+      initialRouteName="Home"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerStyle: { backgroundColor: theme.header },
         headerTintColor: theme.text,
         drawerStyle: { backgroundColor: theme.card },
         drawerActiveTintColor: theme.primary,
-        drawerInactiveTintColor: theme.text, 
+        drawerInactiveTintColor: theme.text,
         drawerActiveBackgroundColor: "rgba(34,221,68,0.1)",
         drawerLabelStyle: { fontWeight: 'bold' }
       }}
     >
-      <Drawer.Screen name="Login" component={LoginScreen} options={{ headerShown: false, drawerItemStyle: { display: "none" } }} />
-      <Drawer.Screen name="CadastroUsuario" component={CadastroUsuario} options={{ headerShown: false, drawerItemStyle: { display: "none" } }} />
-      <Drawer.Screen name="Home" component={HomeScreen} options={{ title: "Início" }} />
-      <Drawer.Screen name="OperacoesPorPlaca" component={OperacoesPorPlaca} options={{ title: "Operações por Placa (OCR)" }} />
-      <Drawer.Screen name="CadastrarVeiculo" component={Cadastro} options={{ title: "Cadastrar Veículo" }} />
-      <Drawer.Screen name="ListarVeiculos" component={Listagem} options={{ title: "Veículos Cadastrados" }} />
-      <Drawer.Screen name="MapaDoPatio" component={MapaScreen} options={{ title: "Mapa do Pátio" }} />
-      <Drawer.Screen name="RadarProximidade" component={RadarProximidade} options={{ title: "Radar de Proximidade" }} />
-      <Drawer.Screen name="Sobre" component={SobreNosScreen} options={{ title: "Sobre Nós" }} />
+      {/* --- CORREÇÃO: Títulos agora usam o 't' --- */}
+      <Drawer.Screen name="Home" component={HomeScreen} options={{ title: t('drawerTitles.home') }} />
+      <Drawer.Screen name="OperacoesPorPlaca" component={OperacoesPorPlaca} options={{ title: t('drawerTitles.operacoes') }} />
+      <Drawer.Screen name="CadastrarVeiculo" component={Cadastro} options={{ title: t('drawerTitles.cadastrar') }} />
+      <Drawer.Screen name="ListarVeiculos" component={Listagem} options={{ title: t('drawerTitles.listar') }} />
+      <Drawer.Screen name="MapaDoPatio" component={MapaScreen} options={{ title: t('drawerTitles.mapa') }} />
+      <Drawer.Screen name="RadarProximidade" component={RadarProximidade} options={{ title: t('drawerTitles.radar') }} />
+      <Drawer.Screen name="Sobre" component={SobreNosScreen} options={{ title: t('drawerTitles.sobre') }} />
     </Drawer.Navigator>
   );
 }
 
+// Componente de Loading (AGORA SÓ PARA O FIREBASE)
+const LoadingScreen = () => (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' }}>
+      <ActivityIndicator size="large" color="#000" />
+    </View>
+);
+
+// --- Componente App Principal ---
 export default function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoadingAuth(false);
+    });
+
+    return () => {
+      unsubscribeAuth();
+    };
+  }, []);
+
+  if (loadingAuth) {
+    return <LoadingScreen />;
+  }
+
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <AppNavigator />
+        {user ? <MainNavigator /> : <AuthNavigator />}
       </NavigationContainer>
     </ThemeProvider>
   );
@@ -178,4 +195,22 @@ const styles = StyleSheet.create({
   drawerFooterLogo: { width: 100, height: 30, resizeMode: "contain", marginBottom: 8 },
   drawerFooterText: { color: "#B0B0B0", fontSize: 13, fontWeight: "bold", textAlign: "center" },
   drawerFooterRightsText: { color: "#777", fontSize: 10, textAlign: "center", marginTop: 4 },
+  languageSwitcher: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  langButton: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    paddingHorizontal: 15,
+  },
+  langButtonActive: {
+    // A cor é definida inline usando o 'theme.primary'
+  },
+  langSeparator: {
+    fontSize: 16,
+  }
 });

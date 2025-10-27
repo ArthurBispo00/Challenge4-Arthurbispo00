@@ -11,9 +11,15 @@ import { createVehicle, updateVehicle, getVehicleByPlate, storeByPlate } from '.
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
 
+// --- MUDANÇA: Importar o hook de tradução ---
+import { useTranslation } from 'react-i18next';
+
 type CadastroScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'CadastrarVeiculo'>;
 
 export default function CadastroVeiculo() {
+  // --- MUDANÇA: Inicializar o hook ---
+  const { t } = useTranslation();
+  
   const navigation = useNavigation<CadastroScreenNavigationProp>();
   const { theme } = useTheme();
   const styles = getStyles(theme);
@@ -40,9 +46,10 @@ export default function CadastroVeiculo() {
   const placaRegex = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/i;
   
   function validarCampos(): string | null {
-    if (!placa || !marca || !modelo || !cor || !anoFabricacao || !anoModelo || !chassi) return 'Preencha todos os campos.';
-    if (!placaRegex.test(placa)) return 'Placa inválida. Formato: AAA-1234 ou ABC1D23.';
-    if (!/^\d{4}$/.test(anoFabricacao) || !/^\d{4}$/.test(anoModelo)) return 'Anos devem ter 4 dígitos.';
+    // --- MUDANÇA: Usar traduções para erros ---
+    if (!placa || !marca || !modelo || !cor || !anoFabricacao || !anoModelo || !chassi) return t('alerts.fillAllFields');
+    if (!placaRegex.test(placa)) return t('cadastro.invalidPlate');
+    if (!/^\d{4}$/.test(anoFabricacao) || !/^\d{4}$/.test(anoModelo)) return t('cadastro.invalidYear');
     return null;
   }
   
@@ -74,22 +81,27 @@ export default function CadastroVeiculo() {
   }
   
   async function salvarVeiculo() {
-    const erro = validarCampos(); if (erro) return Alert.alert('Erro', erro);
+    const erro = validarCampos(); if (erro) return Alert.alert(t('alerts.errorTitle'), erro);
     const novoVeiculo = { placa, marca, modelo, cor, anoFabricacao, anoModelo, chassi, tag_code: tagCode || undefined };
   
     try {
       setSaving(true);
       await salvarLocal(novoVeiculo);
       const { serverOk, action } = await syncCreateOrUpdate(novoVeiculo);
-      Alert.alert('Sucesso', `Veículo ${action === "update" ? "atualizado" : "criado"}.\nServidor: ${serverOk ? 'OK (gravado no banco)' : 'falhou (salvou só no aparelho)'}`);
+      
+      // --- MUDANÇA: Usar traduções para sucesso ---
+      const status = serverOk ? t('cadastro.serverOK') : t('cadastro.serverFail');
+      const message = action === "update" ? t('cadastro.vehicleUpdated') : t('cadastro.vehicleCreated');
+      Alert.alert(t('alerts.successTitle'), `${message}\n${status}`);
+
       if (serverOk) { setPlaca(''); setMarca(''); setModelo(''); setCor(''); setAnoFabricacao(''); setAnoModelo(''); setChassi(''); }
     } catch {
-      Alert.alert('Erro', 'Não foi possível salvar o veículo.');
+      Alert.alert(t('alerts.errorTitle'), t('cadastro.saveError'));
     } finally { setSaving(false); }
   }
   
   async function salvarEArmazenar() {
-    const erro = validarCampos(); if (erro) return Alert.alert('Erro', erro);
+    const erro = validarCampos(); if (erro) return Alert.alert(t('alerts.errorTitle'), erro);
     const novoVeiculo = { placa, marca, modelo, cor, anoFabricacao, anoModelo, chassi, tag_code: tagCode || undefined };
   
     try {
@@ -100,63 +112,74 @@ export default function CadastroVeiculo() {
       const zona = resp?.zone || '-';
       const vaga = resp?.spot || '-';
   
+      // --- MUDANÇA: Usar traduções para sucesso de armazenamento ---
+      const status = serverOk ? t('cadastro.serverOK') : t('cadastro.serverFail');
       Alert.alert(
-        'Vaga Alocada',
-        `Zona: ${zona}\nVaga: ${vaga}\nServidor: ${serverOk ? 'OK (gravado no banco)' : 'falhou (salvou só no aparelho)'}\n\nPara visualizar no mapa, use: Operações por Placa → Buscar.`
+        t('cadastro.spotAllocated'),
+        `${t('cadastro.spotInfo', { zone: zona, spot: vaga })}\n${status}\n\n${t('cadastro.spotMapInfo')}`
       );
   
       setPlaca(''); setMarca(''); setModelo(''); setCor(''); setAnoFabricacao(''); setAnoModelo(''); setChassi('');
     } catch (e:any) {
-      Alert.alert('Erro ao Armazenar', e?.message || 'Falha ao alocar vaga.');
+      Alert.alert(t('cadastro.storageError'), e?.message || t('cadastro.storageErrorDetail'));
     } finally { setStoring(false); }
   }
   
   const handlePlacaRecognized = (txt: string) => {
     if (txt && placaRegex.test(txt)) {
       setPlaca(txt.toUpperCase());
-      Alert.alert('Placa Reconhecida', txt.toUpperCase());
+      Alert.alert(t('cadastro.plateRecognized'), txt.toUpperCase());
     } else {
-      Alert.alert('Placa Inválida', txt || '');
+      Alert.alert(t('cadastro.invalidPlateAlert'), txt || '');
     }
   };
   
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.label}>Placa</Text>
-      <TextInput style={styles.input} value={placa} onChangeText={setPlaca} placeholder="AAA-1234 ou ABC1D23" placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
-      <Text style={styles.label}>Marca</Text>
-      <TextInput style={styles.input} value={marca} onChangeText={setMarca} placeholder="Ex: Honda" placeholderTextColor={theme.placeholder} />
-      <Text style={styles.label}>Modelo</Text>
-      <TextInput style={styles.input} value={modelo} onChangeText={setModelo} placeholder="Ex: CG 160 Titan" placeholderTextColor={theme.placeholder} />
-      <Text style={styles.label}>Cor</Text>
-      <TextInput style={styles.input} value={cor} onChangeText={setCor} placeholder="Ex: Vermelha" placeholderTextColor={theme.placeholder} />
-      <Text style={styles.label}>Ano Fabricação</Text>
-      <TextInput style={styles.input} value={anoFabricacao} onChangeText={(t) => setAnoFabricacao(t.replace(/[^0-9]/g, ''))} keyboardType="numeric" maxLength={4} placeholder="Ex: 2023" placeholderTextColor={theme.placeholder} />
-      <Text style={styles.label}>Ano Modelo</Text>
-      <TextInput style={styles.input} value={anoModelo} onChangeText={(t) => setAnoModelo(t.replace(/[^0-9]/g, ''))} keyboardType="numeric" maxLength={4} placeholder="Ex: 2024" placeholderTextColor={theme.placeholder} />
-      <Text style={styles.label}>Chassi</Text>
-      <TextInput style={styles.input} value={chassi} onChangeText={setChassi} placeholder="Número do chassi" placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
-      <Text style={styles.label}>TAG BLE vinculada</Text>
-      <TextInput style={styles.input} value={tagCode} onChangeText={setTagCode} placeholder="Ex: TAG01" placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
+      {/* --- MUDANÇA: Textos e Placeholders traduzidos --- */}
+      <Text style={styles.label}>{t('cadastro.labelPlate')}</Text>
+      <TextInput style={styles.input} value={placa} onChangeText={setPlaca} placeholder={t('cadastro.placeholderPlate')} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
+      
+      <Text style={styles.label}>{t('cadastro.labelBrand')}</Text>
+      <TextInput style={styles.input} value={marca} onChangeText={setMarca} placeholder={t('cadastro.placeholderBrand')} placeholderTextColor={theme.placeholder} />
+      
+      <Text style={styles.label}>{t('cadastro.labelModel')}</Text>
+      <TextInput style={styles.input} value={modelo} onChangeText={setModelo} placeholder={t('cadastro.placeholderModel')} placeholderTextColor={theme.placeholder} />
+      
+      <Text style={styles.label}>{t('cadastro.labelColor')}</Text>
+      <TextInput style={styles.input} value={cor} onChangeText={setCor} placeholder={t('cadastro.placeholderColor')} placeholderTextColor={theme.placeholder} />
+      
+      <Text style={styles.label}>{t('cadastro.labelYearMake')}</Text>
+      <TextInput style={styles.input} value={anoFabricacao} onChangeText={(t) => setAnoFabricacao(t.replace(/[^0-9]/g, ''))} keyboardType="numeric" maxLength={4} placeholder={t('cadastro.placeholderYear')} placeholderTextColor={theme.placeholder} />
+      
+      <Text style={styles.label}>{t('cadastro.labelYearModel')}</Text>
+      <TextInput style={styles.input} value={anoModelo} onChangeText={(t) => setAnoModelo(t.replace(/[^0-9]/g, ''))} keyboardType="numeric" maxLength={4} placeholder={t('cadastro.placeholderYear')} placeholderTextColor={theme.placeholder} />
+      
+      <Text style={styles.label}>{t('cadastro.labelVin')}</Text>
+      <TextInput style={styles.input} value={chassi} onChangeText={setChassi} placeholder={t('cadastro.placeholderVin')} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
+      
+      <Text style={styles.label}>{t('cadastro.labelTag')}</Text>
+      <TextInput style={styles.input} value={tagCode} onChangeText={setTagCode} placeholder={t('cadastro.placeholderTag')} placeholderTextColor={theme.placeholder} autoCapitalize="characters" />
       
       <View style={styles.placaRecognitionContainer}><PlacaRecognition onPlacaRecognized={handlePlacaRecognized} /></View>
       
       <View style={{flexDirection:'row', gap:10}}>
         <TouchableOpacity style={[styles.button,{flex:1}]} onPress={salvarVeiculo} disabled={saving||storing}>
-          {saving ? <ActivityIndicator color={theme.buttonTextPrimary} /> : <Text style={styles.buttonText}>Salvar</Text>}
+          {saving ? <ActivityIndicator color={theme.buttonTextPrimary} /> : <Text style={styles.buttonText}>{t('cadastro.buttonSave')}</Text>}
         </TouchableOpacity>
         <TouchableOpacity style={[styles.buttonOutline,{flex:1}]} onPress={() => navigation.navigate('ListarVeiculos')} disabled={saving||storing}>
-          <Text style={styles.buttonOutlineText}>Listagem</Text>
+          <Text style={styles.buttonOutlineText}>{t('cadastro.buttonList')}</Text>
         </TouchableOpacity>
       </View>
       
       <TouchableOpacity style={styles.buttonPrimary} onPress={salvarEArmazenar} disabled={saving||storing}>
-        {storing ? <ActivityIndicator color={theme.buttonTextPrimary} /> : <Text style={styles.buttonPrimaryText}>Salvar & Armazenar</Text>}
+        {storing ? <ActivityIndicator color={theme.buttonTextPrimary} /> : <Text style={styles.buttonPrimaryText}>{t('cadastro.buttonSaveAndStore')}</Text>}
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
+// Estilos (sem mudança)
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: { flexGrow: 1, padding: 20, backgroundColor: theme.background },
   label: { fontSize: 16, fontWeight: 'bold', color: theme.text, marginBottom: 8, marginTop: 10 },

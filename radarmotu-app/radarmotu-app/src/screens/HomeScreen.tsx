@@ -8,9 +8,15 @@ import { DrawerParamList } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
 
+// --- MUDANÇA: Importar o hook de tradução ---
+import { useTranslation } from 'react-i18next';
+
 type HomeScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Home'>;
 
 export default function HomeScreen() {
+  // --- MUDANÇA: Inicializar o hook ---
+  const { t } = useTranslation();
+
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { theme } = useTheme();
   const styles = getStyles(theme);
@@ -26,23 +32,29 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.mainContent}>
-        <Text style={styles.title}>Bem-vindo ao Radar Motu!</Text>
-        <Text style={styles.subtitle}>Sua frota sob controle, seu pátio na palma da mão.</Text>
+        {/* --- MUDANÇA: Textos traduzidos --- */}
+        <Text style={styles.title}>{t('home.title')}</Text>
+        <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
+        
         <TouchableOpacity style={styles.styledButton} onPress={() => navigation.navigate('OperacoesPorPlaca')}>
-          <Text style={styles.buttonText}>Operações por Placa (OCR)</Text>
+          <Text style={styles.buttonText}>{t('home.buttonOcr')}</Text>
         </TouchableOpacity>
+        
         <TouchableOpacity style={styles.styledButton} onPress={() => navigation.navigate('ListarVeiculos')}>
-          <Text style={styles.buttonText}>Ver Veículos Cadastrados</Text>
+          <Text style={styles.buttonText}>{t('home.buttonList')}</Text>
         </TouchableOpacity>
       </View>
+      
       <View style={styles.screenFooter}>
-        <Text style={styles.screenFooterText}>Radar Motu App</Text>
-        <Text style={styles.screenFooterText}>© {currentYear} - Metamind Solution</Text>
+        {/* --- MUDANÇA: Textos traduzidos (com variável 'year') --- */}
+        <Text style={styles.screenFooterText}>{t('home.footerApp')}</Text>
+        <Text style={styles.screenFooterText}>{t('home.footerRights', { year: currentYear })}</Text>
       </View>
     </SafeAreaView>
   );
 }
 
+// Estilos (sem mudança)
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.background },
   mainContent: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
