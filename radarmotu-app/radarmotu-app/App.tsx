@@ -2,7 +2,7 @@
 import './src/i18n'; // Import síncrono (CORRETO)
 import "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
-import { View, Image, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Image, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, Platform } from "react-native"; // Adicionado Platform
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import {
@@ -14,7 +14,13 @@ import {
 } from "@react-navigation/drawer";
 import { ThemeProvider, useTheme } from "./src/contexts/ThemeContext";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next'; // Importado aqui
+import { useTranslation } from 'react-i18next';
+
+// --- ADIÇÃO: Imports para Notificações ---
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import Constants from 'expo-constants';
+// --- FIM ADIÇÃO ---
 
 // Firebase
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -36,7 +42,6 @@ export type AuthStackParamList = {
   Login: undefined;
   CadastroUsuario: undefined;
 };
-
 export type MainDrawerParamList = {
   Home: undefined;
   OperacoesPorPlaca: undefined;
@@ -63,27 +68,26 @@ function AuthNavigator() {
 // --- Navegador Principal (Drawer) ---
 function MainNavigator() {
   const { theme } = useTheme();
-  // --- CORREÇÃO: Chamamos o hook 't' aqui ---
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // 't' para os títulos das telas
 
+  // Componente interno para o conteúdo do Drawer
   const CustomDrawerContent = (props: DrawerContentComponentProps) => {
-    // O 't' e 'i18n' para o conteúdo interno do Drawer continuam aqui
-    const { t, i18n } = useTranslation();
+    const { t: tDrawer, i18n } = useTranslation(); // 'tDrawer' específico para o conteúdo
     const currentYear = new Date().getFullYear();
     const changeLangToPt = () => i18n.changeLanguage('pt');
     const changeLangToEs = () => i18n.changeLanguage('es');
 
     const handleLogout = () => {
         Alert.alert(
-            t('drawer.logoutAlertTitle'), t('drawer.logoutAlertMessage'),
+            tDrawer('drawer.logoutAlertTitle'), tDrawer('drawer.logoutAlertMessage'),
             [
-                { text: t('drawer.cancel'), style: "cancel" },
+                { text: tDrawer('drawer.cancel'), style: "cancel" },
                 {
-                    text: t('drawer.confirmLogout'),
+                    text: tDrawer('drawer.confirmLogout'),
                     style: "destructive",
                     onPress: async () => {
                         try { await signOut(auth); }
-                        catch (error) { Alert.alert(t('alerts.errorTitle'), t('drawer.logoutError')); }
+                        catch (error) { Alert.alert(tDrawer('alerts.errorTitle'), tDrawer('drawer.logoutError')); }
                     }
                 }
             ]
@@ -96,21 +100,18 @@ function MainNavigator() {
           <View style={[styles.drawerHeader, { backgroundColor: theme.header }]}>
             <Image source={require("./assets/radarmotu-logo.png")} style={styles.drawerLogo} />
           </View>
-
-          {/* Seletor de Idioma (correto) */}
           <View style={[styles.languageSwitcher, { borderBottomColor: theme.border }]}>
             <TouchableOpacity onPress={changeLangToPt}>
-              <Text style={[styles.langButton, { color: theme.inactive }, i18n.language === 'pt' && [styles.langButtonActive, { color: theme.primary }]]}>PT</Text>
+              <Text style={[styles.langButton, { color: theme.inactive }, i18n.language === 'pt' && { color: theme.primary }]}>PT</Text>
             </TouchableOpacity>
             <Text style={[styles.langSeparator, { color: theme.border }]}>|</Text>
             <TouchableOpacity onPress={changeLangToEs}>
-              <Text style={[styles.langButton, { color: theme.inactive }, i18n.language === 'es' && [styles.langButtonActive, { color: theme.primary }]]}>ES</Text>
+              <Text style={[styles.langButton, { color: theme.inactive }, i18n.language === 'es' && { color: theme.primary }]}>ES</Text>
             </TouchableOpacity>
           </View>
-
           <DrawerItemList {...props} />
           <DrawerItem
-            label={t('drawer.logoutButton')}
+            label={tDrawer('drawer.logoutButton')}
             labelStyle={{ color: theme.text, fontWeight: 'bold' }}
             icon={({ color, size }) => ( <MaterialCommunityIcons name="logout" color={theme.text} size={size} /> )}
             onPress={handleLogout}
@@ -123,8 +124,9 @@ function MainNavigator() {
         </View>
       </View>
     );
-  };
+  }; // Fim do CustomDrawerContent
 
+  // Definição do Drawer Navigator
   return (
     <Drawer.Navigator
       initialRouteName="Home"
@@ -139,7 +141,7 @@ function MainNavigator() {
         drawerLabelStyle: { fontWeight: 'bold' }
       }}
     >
-      {/* --- CORREÇÃO: Títulos agora usam o 't' --- */}
+      {/* Títulos traduzidos usando o 't' do MainNavigator */}
       <Drawer.Screen name="Home" component={HomeScreen} options={{ title: t('drawerTitles.home') }} />
       <Drawer.Screen name="OperacoesPorPlaca" component={OperacoesPorPlaca} options={{ title: t('drawerTitles.operacoes') }} />
       <Drawer.Screen name="CadastrarVeiculo" component={Cadastro} options={{ title: t('drawerTitles.cadastrar') }} />
@@ -149,34 +151,86 @@ function MainNavigator() {
       <Drawer.Screen name="Sobre" component={SobreNosScreen} options={{ title: t('drawerTitles.sobre') }} />
     </Drawer.Navigator>
   );
-}
+} // Fim do MainNavigator
 
-// Componente de Loading (AGORA SÓ PARA O FIREBASE)
+// Componente de Loading
 const LoadingScreen = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' }}>
       <ActivityIndicator size="large" color="#000" />
     </View>
 );
 
+// --- ADIÇÃO: Função para registrar para notificações ---
+async function registerForPushNotificationsAsync(): Promise<string | undefined> {
+  let token;
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      console.error('Falha ao obter permissão para notificações push!');
+      return;
+    }
+    try {
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+      if (!projectId) {
+         console.error("projectId não encontrado no app.json (extra.eas.projectId)");
+         Alert.alert("Erro de Configuração", "projectId não encontrado para obter o token de notificação.");
+         return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+      console.log('Expo Push Token:', token);
+    } catch (e) {
+       console.error("Erro ao obter o Expo Push Token:", e);
+       Alert.alert("Erro Token", "Não foi possível obter o token para notificações.");
+    }
+  } else {
+    console.warn('Deve usar um dispositivo físico para testar Notificações Push');
+  }
+  return token;
+}
+// --- FIM ADIÇÃO ---
+
+
 // --- Componente App Principal ---
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+  const [expoPushToken, setExpoPushToken] = useState<string | undefined>(undefined); // Estado para o token
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => { // async aqui
+      setUser(currentUser);
       setLoadingAuth(false);
+      if (currentUser) {
+        console.log("Usuário logado, tentando obter token...");
+        const token = await registerForPushNotificationsAsync(); // Chama a função
+        if (token) {
+           console.log("Token obtido com sucesso:", token);
+           setExpoPushToken(token); // Guarda o token
+        } else {
+           console.log("Não foi possível obter o token.");
+        }
+      } else {
+         console.log("Usuário deslogado, token não será obtido.");
+         setExpoPushToken(undefined); // Limpa o token
+      }
     });
+    return () => { unsubscribeAuth(); };
+  }, []); // Roda apenas uma vez
 
-    return () => {
-      unsubscribeAuth();
-    };
-  }, []);
-
-  if (loadingAuth) {
-    return <LoadingScreen />;
-  }
+  if (loadingAuth) { return <LoadingScreen />; }
 
   return (
     <ThemeProvider>
@@ -185,7 +239,7 @@ export default function App() {
       </NavigationContainer>
     </ThemeProvider>
   );
-}
+} // Fim do App
 
 // Estilos
 const styles = StyleSheet.create({
@@ -207,10 +261,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingHorizontal: 15,
   },
-  langButtonActive: {
-    // A cor é definida inline usando o 'theme.primary'
-  },
-  langSeparator: {
-    fontSize: 16,
-  }
+  langButtonActive: { /* Cor definida inline */ },
+  langSeparator: { fontSize: 16 }
 });

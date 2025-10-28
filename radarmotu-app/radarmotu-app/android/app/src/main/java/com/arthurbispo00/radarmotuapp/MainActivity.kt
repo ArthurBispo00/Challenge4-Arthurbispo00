@@ -1,4 +1,4 @@
-package com.seuorg.radarmotu
+package com.arthurbispo00.radarmotuapp
 
 import android.os.Build
 import android.os.Bundle

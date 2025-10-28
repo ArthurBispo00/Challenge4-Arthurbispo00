@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "216057105931",
+    "project_id": "radarmotu-app",
+    "storage_bucket": "radarmotu-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216057105931:android:4ad50f0f6d2e7a8031410e",
+        "android_client_info": {
+          "package_name": "com.arthurbispo00.radarmotuapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7I9rejGuf1BqWNOMXQkxnUhykO8pyYdI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

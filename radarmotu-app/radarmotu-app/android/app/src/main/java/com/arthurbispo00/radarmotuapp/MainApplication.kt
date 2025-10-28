@@ -1,4 +1,4 @@
-package com.seuorg.radarmotu
+package com.arthurbispo00.radarmotuapp
 
 import android.app.Application
 import android.content.res.Configuration

@@ -16,20 +16,33 @@
           },
           "ios": {}
         }
+      ],
+  
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png", 
+          "color": "#22DD44", 
+          "sounds": [] 
+        }
       ]
     ],
     "android": {
-      "package": "com.seuorg.radarmotu",
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true,
+      "package": "com.arthurbispo00.radarmotuapp",
       "permissions": [
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT",
-        "android.permission.BLUETOOTH_SCAN"
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.VIBRATE",
+        "android.permission.INTERNET"
       ]
     },
     "ios": {
-      "bundleIdentifier": "com.seuorg.radarmotu",
+      "bundleIdentifier": "com.arthurbispo00.radarmotuapp",
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "O Radar usa Bluetooth para localizar sua TAG próxima."
       }
