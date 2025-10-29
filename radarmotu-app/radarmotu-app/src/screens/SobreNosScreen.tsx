@@ -8,11 +8,11 @@ import { ThemeType } from '../themes';
 import { auth } from '../config/firebase';
 import { signOut } from 'firebase/auth';
 
-// --- MUDANÇA: Importar useTranslation ---
+
 import { useTranslation } from 'react-i18next';
 
 export default function SobreNosScreen() {
-  // --- MUDANÇA: Inicializar useTranslation ---
+  
   const { t } = useTranslation();
 
   const nav = useNavigation<any>();
@@ -27,8 +27,7 @@ export default function SobreNosScreen() {
   }, [nav, theme]);
 
   const handleLogout = () => {
-    // --- MUDANÇA: Usar traduções para o Alert ---
-    // Reutilizando as chaves do drawer/alerts
+
       Alert.alert(
           t('drawer.logoutAlertTitle'),
           t('drawer.logoutAlertMessage'),
@@ -40,7 +39,7 @@ export default function SobreNosScreen() {
                   onPress: async () => {
                       try {
                           await signOut(auth);
-                          // A navegação agora é controlada pelo App.tsx
+                          
                       } catch (error) {
                           console.error("Erro ao fazer logout:", error);
                           Alert.alert(t('alerts.errorTitle'), t('drawer.logoutError'));
@@ -53,7 +52,7 @@ export default function SobreNosScreen() {
 
   return (
     <View style={styles.container}>
-      {/* --- MUDANÇA: Textos traduzidos --- */}
+      {/* --- Textos traduzidos --- */}
       <Text style={styles.title}>{t('sobre.title')}</Text>
       <Text style={styles.paragraph}>
         {t('sobre.paragraph')}
@@ -77,7 +76,7 @@ export default function SobreNosScreen() {
   );
 }
 
-// Estilos (sem mudança)
+// Estilos
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: {
     flex: 1,
