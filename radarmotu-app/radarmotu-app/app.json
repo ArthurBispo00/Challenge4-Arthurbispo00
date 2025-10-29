@@ -7,6 +7,9 @@
     "orientation": "portrait",
     "sdkVersion": "51.0.0",
     "plugins": [
+
+      "expo-dev-client", 
+
       [
         "expo-build-properties",
         {
@@ -17,20 +20,20 @@
           "ios": {}
         }
       ],
-  
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png", 
-          "color": "#22DD44", 
-          "sounds": [] 
+          "icon": "./assets/notification-icon.png",
+          "color": "#22DD44",
+          "sounds": []
         }
       ]
+      
     ],
     "android": {
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true,
-      "package": "com.arthurbispo00.radarmotuapp",
+      "package": "com.arthurbispo00.radarmotuapp", 
       "permissions": [
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.BLUETOOTH",
@@ -42,7 +45,7 @@
       ]
     },
     "ios": {
-      "bundleIdentifier": "com.arthurbispo00.radarmotuapp",
+      "bundleIdentifier": "com.arthurbispo00.radarmotuapp", 
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "O Radar usa Bluetooth para localizar sua TAG próxima."
       }
@@ -51,6 +54,7 @@
       "eas": {
         "projectId": "efa16ba2-6119-4693-b839-14a9e56d6ce7"
       }
-    }
+    },
+    "owner": "arthurbispo" 
   }
 }

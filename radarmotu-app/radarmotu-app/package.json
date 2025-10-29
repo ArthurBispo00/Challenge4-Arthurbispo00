@@ -38,7 +38,8 @@
     "react-native-web": "~0.19.13",
     "expo-notifications": "~0.28.19",
     "expo-device": "~6.0.2",
-    "expo-constants": "~16.0.2"
+    "expo-constants": "~16.0.2",
+    "expo-dev-client": "~4.0.29"
   },
   "devDependencies": {
     "@types/react": "~18.2.79",
