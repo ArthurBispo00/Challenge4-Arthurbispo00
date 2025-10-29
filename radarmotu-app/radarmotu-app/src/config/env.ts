@@ -2,7 +2,7 @@
 
 // Troque pelo IP LOCAL da sua máquina (mesma rede do celular)
 
-export const SERVER_HOST = "10.190.128.15"; // <<< ajuste aqui
+export const SERVER_HOST = "10.185.144.15"; // <<< ajuste aqui
 
 export const RADAR_API_BASE = `http://${SERVER_HOST}:8000`;
 
