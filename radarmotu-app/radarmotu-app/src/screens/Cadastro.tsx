@@ -5,25 +5,23 @@ import { View, Text, TextInput, StyleSheet, Alert, ScrollView, TouchableOpacity,
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
-// --- VERIFIQUE ESTE CAMINHO ---
-// Se seu 'types.ts' está em outro lugar (ex: src/types), ajuste aqui.
+
 import { DrawerParamList } from '../navigation/types'; 
-// --- FIM VERIFICAÇÃO ---
+
 import PlacaRecognition from './PlacaRecognition';
 import { createVehicle, updateVehicle, getVehicleByPlate, storeByPlate } from '../services/api'; // <--- Chamadas de API INTACTAS
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
-import { useTranslation } from 'react-i18next'; // <--- Tradução INTACTA
+import { useTranslation } from 'react-i18next'; // 
 
-// --- ADIÇÃO: Imports para Notificações ---
+
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-// --- FIM ADIÇÃO ---
 
 
-// --- ADIÇÃO: Função para Enviar Notificação Push ---
-// Colocada fora do componente
+
+
 async function sendPushNotification(expoPushToken: string, title: string, body: string, data?: object) {
   const message = {
     to: expoPushToken,
@@ -43,18 +41,18 @@ async function sendPushNotification(expoPushToken: string, title: string, body: 
     console.error("Erro ao enviar notificação:", error);
   }
 }
-// --- FIM ADIÇÃO ---
+
 
 
 type CadastroScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'CadastrarVeiculo'>;
 
 export default function CadastroVeiculo() {
-  const { t } = useTranslation(); // INTACTO
-  const navigation = useNavigation<CadastroScreenNavigationProp>(); // INTACTO
-  const { theme } = useTheme(); // INTACTO
-  const styles = getStyles(theme); // INTACTO
+  const { t } = useTranslation(); 
+  const navigation = useNavigation<CadastroScreenNavigationProp>();
+  const { theme } = useTheme(); 
+  const styles = getStyles(theme); 
 
-  // States (INTACTOS)
+  
   const [placa, setPlaca] = useState('');
   const [marca, setMarca] = useState('');
   const [modelo, setModelo] = useState('');
@@ -66,12 +64,12 @@ export default function CadastroVeiculo() {
   const [saving, setSaving] = useState(false);
   const [storing, setStoring] = useState(false);
 
-  // useLayoutEffect (INTACTO)
+ 
   useLayoutEffect(() => { navigation.setOptions({ headerStyle: { backgroundColor: theme.header }, headerTintColor: theme.text }); }, [navigation, theme]);
 
   const placaRegex = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/i; // INTACTO
 
-  // validarCampos (INTACTO)
+  
   function validarCampos(): string | null {
     if (!placa || !marca || !modelo || !cor || !anoFabricacao || !anoModelo || !chassi) return t('alerts.fillAllFields');
     if (!placaRegex.test(placa)) return t('cadastro.invalidPlate');
@@ -79,7 +77,7 @@ export default function CadastroVeiculo() {
     return null;
   }
 
-  // salvarLocal (INTACTO)
+ 
   async function salvarLocal(novoVeiculo: any) {
     const veiculosSalvos = await AsyncStorage.getItem('@lista_veiculos');
     const lista = veiculosSalvos ? JSON.parse(veiculosSalvos) : [];
@@ -88,7 +86,7 @@ export default function CadastroVeiculo() {
     await AsyncStorage.setItem('@lista_veiculos', JSON.stringify(lista));
   }
 
-  // syncCreateOrUpdate (INTACTO)
+  
   async function syncCreateOrUpdate(novoVeiculo: any) {
     let serverOk = false, action = "create";
     try {
@@ -105,14 +103,14 @@ export default function CadastroVeiculo() {
       const check = await getVehicleByPlate(placa.toUpperCase()).catch(()=>null);
       serverOk = !!check?.plate;
     } catch (e) {
-      // Adicionado log para erro na API
+      
       console.error("Erro em syncCreateOrUpdate:", e);
-      // Mantendo o catch vazio para não quebrar o fluxo original, mas logando
+     
     }
     return { serverOk, action };
   }
 
-  // --- FUNÇÃO salvarVeiculo MODIFICADA (apenas no finally) ---
+  // --- FUNÇÃO salvarVeiculo
   async function salvarVeiculo() {
     const erro = validarCampos(); if (erro) return Alert.alert(t('alerts.errorTitle'), erro);
     const novoVeiculo = { placa, marca, modelo, cor, anoFabricacao, anoModelo, chassi, tag_code: tagCode || undefined };
@@ -121,21 +119,21 @@ export default function CadastroVeiculo() {
 
     try {
       setSaving(true);
-      await salvarLocal(novoVeiculo); // INTACTO
-      const { serverOk, action } = await syncCreateOrUpdate(novoVeiculo); // INTACTO
-      const status = serverOk ? t('cadastro.serverOK') : t('cadastro.serverFail'); // INTACTO
+      await salvarLocal(novoVeiculo); 
+      const { serverOk, action } = await syncCreateOrUpdate(novoVeiculo); 
+      const status = serverOk ? t('cadastro.serverOK') : t('cadastro.serverFail'); 
       const message = action === "update" ? t('cadastro.vehicleUpdated') : t('cadastro.vehicleCreated'); // INTACTO
-      Alert.alert(t('alerts.successTitle'), `${message}\n${status}`); // INTACTO
-      success = true; // Marcar sucesso AQUI, após as chamadas de API
+      Alert.alert(t('alerts.successTitle'), `${message}\n${status}`); 
+      success = true; 
 
       if (serverOk) { setPlaca(''); setMarca(''); setModelo(''); setCor(''); setAnoFabricacao(''); setAnoModelo(''); setChassi(''); } // INTACTO
-    } catch (e_save) { // Capturar erro específico do try
+    } catch (e_save) { 
       console.error("Erro em salvarVeiculo (try block):", e_save);
-      Alert.alert(t('alerts.errorTitle'), t('cadastro.saveError')); // INTACTO
+      Alert.alert(t('alerts.errorTitle'), t('cadastro.saveError'));
     } finally {
-      setSaving(false); // INTACTO
-      // --- ADIÇÃO: Enviar Notificação AQUI ---
-      if (success) { // Só envia se o try completou sem erro
+      setSaving(false); 
+      
+      if (success) { 
         console.log("[Cadastro] Operação concluída. Tentando enviar notificação...");
         try {
           const projectId = Constants.expoConfig?.extra?.eas?.projectId;
@@ -150,18 +148,18 @@ export default function CadastroVeiculo() {
                 );
              } else { console.warn("[Cadastro] Não foi possível obter token para enviar notificação.") }
           } else { console.warn("[Cadastro] Não é um dispositivo físico ou projectId não encontrado, notificação não enviada.") }
-        } catch (e_notify) { // Capturar erro específico da notificação
+        } catch (e_notify) { 
            console.error("[Cadastro] Erro ao tentar obter token/enviar notificação:", e_notify);
-           // Não mostrar Alerta aqui para não confundir
+           
         }
       } else {
          console.log("[Cadastro] Operação não foi bem sucedida, notificação não será enviada.");
       }
-      // --- FIM ADIÇÃO ---
+      
     }
-  } // Fim salvarVeiculo
+  }
 
-  // --- FUNÇÃO salvarEArmazenar MODIFICADA (apenas no finally) ---
+  // --- FUNÇÃO salvarEArmazenar 
   async function salvarEArmazenar() {
     const erro = validarCampos(); if (erro) return Alert.alert(t('alerts.errorTitle'), erro);
     const novoVeiculo = { placa, marca, modelo, cor, anoFabricacao, anoModelo, chassi, tag_code: tagCode || undefined };
@@ -171,32 +169,29 @@ export default function CadastroVeiculo() {
 
     try {
       setStoring(true);
-      await salvarLocal(novoVeiculo); // INTACTO
-      const { serverOk, action } = await syncCreateOrUpdate(novoVeiculo); // INTACTO
-      // --- Verificação Adicional ---
+      await salvarLocal(novoVeiculo); 
+      const { serverOk, action } = await syncCreateOrUpdate(novoVeiculo);
       if (!serverOk) {
-          // Se sync falhou, talvez não faça sentido tentar alocar? Depende da regra de negócio.
-          // Por segurança, vamos logar e continuar, mas a notificação refletirá o serverOk=false.
           console.warn("[Armazenamento] syncCreateOrUpdate falhou, mas tentando alocar vaga mesmo assim.");
       }
-      // --- Fim Verificação ---
-      const resp = await storeByPlate(placa.toUpperCase()); // INTACTO
-      spotInfoForNotification.zone = resp?.zone || '-'; // INTACTO
-      spotInfoForNotification.spot = resp?.spot || '-'; // INTACTO
-      const status = serverOk ? t('cadastro.serverOK') : t('cadastro.serverFail'); // INTACTO
-      Alert.alert( // INTACTO
+      
+      const resp = await storeByPlate(placa.toUpperCase()); 
+      spotInfoForNotification.zone = resp?.zone || '-'; 
+      spotInfoForNotification.spot = resp?.spot || '-'; 
+      const status = serverOk ? t('cadastro.serverOK') : t('cadastro.serverFail'); 
+      Alert.alert( 
         t('cadastro.spotAllocated'),
         `${t('cadastro.spotInfo', { zone: spotInfoForNotification.zone, spot: spotInfoForNotification.spot })}\n${status}\n\n${t('cadastro.spotMapInfo')}`
       );
-      success = true; // Marcar sucesso AQUI
+      success = true; 
 
       setPlaca(''); setMarca(''); setModelo(''); setCor(''); setAnoFabricacao(''); setAnoModelo(''); setChassi(''); // INTACTO
     } catch (e_store) { // Capturar erro específico do try
       console.error("Erro em salvarEArmazenar (try block):", e_store);
       Alert.alert(t('cadastro.storageError'), (e_store as any)?.message || t('cadastro.storageErrorDetail')); // INTACTO (melhoria na msg de erro)
     } finally {
-      setStoring(false); // INTACTO
-      // --- ADIÇÃO: Enviar Notificação AQUI ---
+      setStoring(false); 
+      
       if (success) { // Só envia se o try completou sem erro
         console.log("[Armazenamento] Operação concluída. Tentando enviar notificação...");
         try {
@@ -222,7 +217,7 @@ export default function CadastroVeiculo() {
     }
   } // Fim salvarEArmazenar
 
-  // handlePlacaRecognized (INTACTO)
+  // handlePlacaRecognized 
   const handlePlacaRecognized = (txt: string) => {
     if (txt && placaRegex.test(txt)) {
       setPlaca(txt.toUpperCase());
@@ -232,7 +227,7 @@ export default function CadastroVeiculo() {
     }
   };
 
-  // return JSX (INTACTO)
+  // return JSX 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
        <Text style={styles.label}>{t('cadastro.labelPlate')}</Text>
@@ -267,7 +262,7 @@ export default function CadastroVeiculo() {
   );
 }
 
-// Estilos (INTACTO)
+// Estilos 
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: { flexGrow: 1, padding: 20, backgroundColor: theme.background },
   label: { fontSize: 16, fontWeight: 'bold', color: theme.text, marginBottom: 8, marginTop: 10 },

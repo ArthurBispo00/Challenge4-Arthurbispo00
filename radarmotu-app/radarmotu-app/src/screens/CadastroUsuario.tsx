@@ -15,11 +15,11 @@ import { auth } from "../config/firebase";
 import { useTheme } from "../contexts/ThemeContext";
 import { ThemeType } from "../themes";
 
-// --- MUDANÇA: Importar o hook de tradução ---
+// ---  Importar o hook de tradução ---
 import { useTranslation } from "react-i18next";
 
 export default function CadastroUsuario({ navigation }: any) {
-  // --- MUDANÇA: Inicializar o hook ---
+  // ---  Inicializar o hook ---
   const { t } = useTranslation();
 
   const { theme } = useTheme();
@@ -31,7 +31,7 @@ export default function CadastroUsuario({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   const handleCadastro = async () => {
-    // --- MUDANÇA: Usar traduções para alertas ---
+    // --- Usar traduções para alertas ---
     if (!email || !senha || !confirmarSenha) {
       Alert.alert(t('alerts.errorTitle'), t('alerts.fillAllFields'));
       return;
@@ -62,7 +62,7 @@ export default function CadastroUsuario({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      {/* --- MUDANÇA: Textos e Placeholders traduzidos --- */}
+      {/* --- Textos e Placeholders traduzidos --- */}
       <Text style={styles.title}>{t('cadastroUsuario.title')}</Text>
       <TextInput
         placeholder={t('login.emailPlaceholder')} // Reutilizando a tradução do login
@@ -103,7 +103,7 @@ export default function CadastroUsuario({ navigation }: any) {
   );
 }
 
-// Estilos (sem mudança)
+// Estilos 
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: theme.background },
   title: { fontSize: 26, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: theme.text },

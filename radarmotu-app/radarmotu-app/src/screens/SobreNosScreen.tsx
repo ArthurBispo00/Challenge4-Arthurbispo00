@@ -1,4 +1,4 @@
-// screens/SobreNosScreen.tsx (AJUSTADO)
+// screens/SobreNosScreen.tsx
 
 import React, { useLayoutEffect } from 'react';
 import { View, Text, StyleSheet, Linking, TouchableOpacity, Alert } from 'react-native';

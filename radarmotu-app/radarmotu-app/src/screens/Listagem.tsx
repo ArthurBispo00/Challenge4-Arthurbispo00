@@ -9,7 +9,7 @@ import { DrawerParamList } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
 
-// --- MUDANÇA: Importar o hook de tradução ---
+
 import { useTranslation } from 'react-i18next';
 
 interface Veiculo {
@@ -20,7 +20,7 @@ interface Veiculo {
 type ListagemScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'ListarVeiculos'>;
 
 export default function Listagem() {
-  // --- MUDANÇA: Inicializar o hook ---
+  
   const { t } = useTranslation();
 
   const navigation = useNavigation<ListagemScreenNavigationProp>();
@@ -47,7 +47,7 @@ export default function Listagem() {
       setVeiculos(listaVeiculos);
     } catch (error) {
       console.error('Erro ao carregar os veículos:', error);
-      // --- MUDANÇA: Usar tradução para alerta ---
+     
       Alert.alert(t('alerts.errorTitle'), t('listagem.loadError'));
     } finally {
       setIsLoading(false);
@@ -56,7 +56,7 @@ export default function Listagem() {
 
   async function handleDelete(placa: string) {
     Alert.alert(
-      // --- MUDANÇA: Usar traduções para alerta de confirmação ---
+      
       t('listagem.deleteTitle'), 
       t('listagem.deleteMessage', { placa: placa }), // Passando a placa para a tradução
       [
@@ -66,7 +66,7 @@ export default function Listagem() {
           style: "destructive", 
           onPress: async () => {
             try {
-              // await deleteVehicle(placa); // TODO: Descomentar para API .NET
+              // await deleteVehicle(placa); 
               Alert.alert(t('alerts.successTitle'), t('listagem.deleteSuccess'));
               carregarVeiculos();
             } catch (error) {
@@ -107,7 +107,7 @@ export default function Listagem() {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color={theme.primary} />
-        {/* --- MUDANÇA: Usar tradução para texto de loading --- */}
+        {/* --- Usar tradução para texto de loading --- */}
         <Text style={styles.loadingText}>{t('listagem.loading')}</Text>
       </View>
     );
@@ -115,7 +115,7 @@ export default function Listagem() {
 
   return (
     <View style={styles.container}>
-      {/* --- MUDANÇA: Usar tradução para título --- */}
+      {/* --- Usar tradução para título --- */}
       <Text style={styles.heading}>{t('listagem.title')}</Text>
       <FlatList
         data={veiculos}
@@ -124,21 +124,21 @@ export default function Listagem() {
         contentContainerStyle={styles.listContentContainer}
         ListEmptyComponent={
           <View style={styles.emptyListComponent}>
-            {/* --- MUDANÇA: Usar traduções para lista vazia --- */}
+            {/* --- Usar traduções para lista vazia --- */}
             <Text style={styles.emptyListText}>{t('listagem.emptyList')}</Text>
             <Text style={styles.emptyListSubText}>{t('listagem.emptyListSub')}</Text>
           </View>
         }
       />
       <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={() => navigation.navigate('CadastrarVeiculo')}>
-        {/* --- MUDANÇA: Usar tradução para botão --- */}
+        {/* --- Usar tradução para botão --- */}
         <Text style={[styles.buttonText, styles.secondaryButtonText]}>{t('listagem.buttonNew')}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-// Estilos (sem mudança)
+// Estilos
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 15, paddingTop: 20, paddingBottom: 10, backgroundColor: theme.background },
   loadingContainer: { justifyContent: 'center', alignItems: 'center' },

@@ -8,13 +8,13 @@ import { DrawerParamList } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
 
-// --- MUDANÇA: Importar o hook de tradução ---
+// --- Importar o hook de tradução ---
 import { useTranslation } from 'react-i18next';
 
 type HomeScreenNavigationProp = DrawerNavigationProp<DrawerParamList, 'Home'>;
 
 export default function HomeScreen() {
-  // --- MUDANÇA: Inicializar o hook ---
+  // ---  Inicializar o hook ---
   const { t } = useTranslation();
 
   const navigation = useNavigation<HomeScreenNavigationProp>();
@@ -32,7 +32,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.mainContent}>
-        {/* --- MUDANÇA: Textos traduzidos --- */}
+        {/* --- Textos traduzidos --- */}
         <Text style={styles.title}>{t('home.title')}</Text>
         <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
         
@@ -46,7 +46,7 @@ export default function HomeScreen() {
       </View>
       
       <View style={styles.screenFooter}>
-        {/* --- MUDANÇA: Textos traduzidos (com variável 'year') --- */}
+        {/* ---  Textos traduzidos --- */}
         <Text style={styles.screenFooterText}>{t('home.footerApp')}</Text>
         <Text style={styles.screenFooterText}>{t('home.footerRights', { year: currentYear })}</Text>
       </View>
@@ -54,7 +54,7 @@ export default function HomeScreen() {
   );
 }
 
-// Estilos (sem mudança)
+// Estilos 
 const getStyles = (theme: ThemeType) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.background },
   mainContent: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },

@@ -8,10 +8,10 @@ import { BleManager, State as BleState, Device } from "react-native-ble-plx";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import { Magnetometer } from "expo-sensors";
 
-// --- MUDANÇA: Importar o hook de tradução ---
+// --- Importar o hook de tradução ---
 import { useTranslation } from "react-i18next"; 
 
-// Constantes e Funções Utilitárias (sem mudança)
+// Constantes e Funções Utilitárias 
 const W = 320, H = 220;
 type Anchor = { x: number; y: number };
 type Anchors = Record<string, Anchor>;
@@ -34,7 +34,7 @@ function fitAffineFromBBoxes(tagMinX:number, tagMaxX:number, tagMinY:number, tag
 function applyAffine(p:Pos, A:Affine): Pos { /* ... */ }
 
 
-// --- MiniRadarArea (Traduzido) ---
+// --- MiniRadarArea ---
 function MiniRadarArea({ meters, angleDeg, maxMeters = 20, title: propTitle }:{
   meters:number; angleDeg:number; maxMeters?:number; title?:string;
 }) {
@@ -77,7 +77,7 @@ function MiniRadarArea({ meters, angleDeg, maxMeters = 20, title: propTitle }:{
          <SvgText x={x} y={y-10} fill="#E5E7EB" fontSize="10" fontWeight="bold" textAnchor="middle">📍</SvgText>
          <Circle cx={R} cy={R} r={4} fill="#F59E0B"/>
       </Svg>
-      {/* --- MUDANÇA: Texto traduzido --- */}
+      {/* --- Texto traduzido --- */}
       <Text style={s.radarMeters}>{t('mapa.metersToArea', { distance: meters.toFixed(1) })}</Text>
     </View>
   );
@@ -85,7 +85,7 @@ function MiniRadarArea({ meters, angleDeg, maxMeters = 20, title: propTitle }:{
 
 
 export default function MapaScreen() {
-  // --- MUDANÇA: Inicializar o hook ---
+  // --- Inicializar o hook ---
   const { t } = useTranslation();
 
   const route = useRoute<any>();
@@ -103,7 +103,7 @@ export default function MapaScreen() {
   const [anchors, setAnchors] = useState<Anchors>({});
   const [mapScale, setMapScale] = useState<MapScale>({ scaleX:1, scaleY:1, minX:0, minY:0, padding:16, spanX:1, spanY:1 });
 
-  // --- MUDANÇA: Status inicial traduzido ---
+  // --- Status inicial traduzido ---
   const [status, setStatus] = useState(t('mapa.connecting')); 
   const [tagCode, setTagCode] = useState<string | null>(null);
   const [locInfo, setLocInfo] = useState<any>(null);
@@ -122,7 +122,7 @@ export default function MapaScreen() {
   
   useEffect(() => {
     if (!plate) {
-      // --- MUDANÇA: Alertas traduzidos ---
+      // --- Alertas traduzidos ---
       Alert.alert(t('mapa.invalidAccess'), t('mapa.invalidAccessSub'));
       nav.goBack();
     }
@@ -164,13 +164,13 @@ export default function MapaScreen() {
       const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
       ws.onopen = () => {
-        // --- MUDANÇA: Status traduzido ---
+        // --- Status traduzido ---
         setStatus(t('mapa.connected')); 
         if (reconnectRef.current.timer) clearTimeout(reconnectRef.current.timer);
         reconnectRef.current.tries = 0;
       };
       ws.onclose = () => {
-        // --- MUDANÇA: Status traduzido ---
+        // --- Status traduzido ---
         setStatus(t('mapa.disconnected')); 
         wsRef.current = null;
         if (!closedByUs) { 
@@ -228,7 +228,7 @@ export default function MapaScreen() {
     let stopScanTimer: any;
     const bleManager = bleRef.current;
     const startScan = async () => {
-      const permissionsOk = await ensureBlePermissions(); // ensureBlePermissions agora usa 't'
+      const permissionsOk = await ensureBlePermissions(); 
       if (!permissionsOk) return;
       const state = await bleManager.state();
       if (state !== BleState.PoweredOn) return;
@@ -238,7 +238,7 @@ export default function MapaScreen() {
         if (err || !dev) return;
         const name = (dev.localName || dev.name || "").toUpperCase();
         if (name === tagCode.toUpperCase() && dev.rssi) {
-          const distance = rssiToMeters(dev.rssi, DEFAULT_TX_POWER, DEFAULT_N_PATH); // Mantido por simplicidade, poderia ser trocado
+          const distance = rssiToMeters(dev.rssi, DEFAULT_TX_POWER, DEFAULT_N_PATH); 
           setPhoneDistanceToTag(distance);
         }
       });
@@ -254,7 +254,7 @@ export default function MapaScreen() {
       if (stopScanTimer) clearTimeout(stopScanTimer);
       if (scanInterval) clearInterval(scanInterval);
     };
-  }, [tagCode, t]); // Adicionado 't'
+  }, [tagCode, t]); 
 
   useEffect(() => {
     if (position && phoneDistanceToTag != null && phoneHeading != null) {
@@ -327,7 +327,7 @@ export default function MapaScreen() {
     let stopTimer: any;
     (async () => {
       if (phonePos) return;
-      const ok = await ensureBlePermissions(); if (!ok) return; // Usa 't'
+      const ok = await ensureBlePermissions(); if (!ok) return; 
       const st = await bleRef.current.state();
       if (st !== BleState.PoweredOn) return;
       setBleScanning(true);
@@ -356,7 +356,7 @@ export default function MapaScreen() {
       if (stopTimer) clearTimeout(stopTimer);
       setBleScanning(false);
     };
-  }, [anchors, phonePos, t]); // Adicionado 't'
+  }, [anchors, phonePos, t]); 
   
   const phoneStale = useMemo(() => { 
       if (!phonePos) return true;
@@ -393,7 +393,7 @@ export default function MapaScreen() {
   
   const MAX_AREA_GUIDE_METERS = 20;
 
-  // --- MUDANÇA: Textos do Banner traduzidos ---
+  // ---  Textos do Banner traduzidos ---
   const bannerText = useMemo(() => {
     if (!area) return t('mapa.loadingArea');
     if (phoneInsideFinal) return t('mapa.insideArea');
@@ -432,7 +432,7 @@ export default function MapaScreen() {
   
   return (
     <View style={s.container}>
-      {/* --- MUDANÇA: Textos traduzidos --- */}
+      {/* --- Textos traduzidos --- */}
       <Text style={s.title}>{t('mapa.title')}</Text>
       <Text style={s.info}>{t('mapa.status')} {status}</Text>
       <Text style={s.info}>{t('mapa.labelPlate')} {plate}{tagCode ? `   |   ${t('mapa.labelTag')} ${tagCode}` : ""}</Text>
@@ -459,7 +459,7 @@ export default function MapaScreen() {
         <MiniRadarArea meters={areaGuide.meters} angleDeg={areaGuide.angleDeg} maxMeters={MAX_AREA_GUIDE_METERS} title={t('mapa.approachArea')} />
       )}
       
-      {/* --- MUDANÇA: Botões traduzidos --- */}
+      {/* --- Botões traduzidos --- */}
       <TouchableOpacity style={s.btn} onPress={onBuzz}>
         <Text style={s.btnT}>{t('mapa.buttonBuzzer')}</Text>
       </TouchableOpacity>
@@ -474,7 +474,7 @@ export default function MapaScreen() {
         </Text>
       </TouchableOpacity>
 
-      {/* --- Textos de Debug (mantidos como estão) --- */}
+      {/* --- Textos de Debug --- */}
       <View style={s.debugBox}>
         <Text style={s.debugT}>TAG(norm): {position ? `${position.x.toFixed(2)}, ${position.y.toFixed(2)}` : "—"}</Text>
         <Text style={s.debugT}>PHONE(anchor): {phonePos ? `${phonePos.x.toFixed(2)}, ${phonePos.y.toFixed(2)}` : "—"}</Text>
@@ -487,7 +487,7 @@ export default function MapaScreen() {
   );
 }
 
-// Estilos (sem mudança)
+// Estilos 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#1A1D21", padding: 16 },
   title: { color: '#fff', fontWeight: 'bold', fontSize: 18, marginBottom: 8 },

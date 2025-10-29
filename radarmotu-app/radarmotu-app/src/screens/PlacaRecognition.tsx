@@ -15,7 +15,7 @@ export default function PlacaRecognition({ onPlacaRecognized }: PlacaRecognition
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPickingImage, setIsPickingImage] = useState<boolean>(false);
 
-  const apiUrl = 'http://191.238.222.198:3000/upload'; // sua API OCR
+  const apiUrl = 'http://191.238.222.198:3000/upload'; 
 
   const selectImage = async (useCamera: boolean) => {
     setIsPickingImage(true);

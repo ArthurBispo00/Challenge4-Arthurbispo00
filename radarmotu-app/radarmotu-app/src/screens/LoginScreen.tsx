@@ -1,5 +1,4 @@
 // src/screens/LoginScreen.tsx
-// (Esta é a versão LIMPA, sem o seletor de idioma)
 
 import React from 'react';
 import {
@@ -16,10 +15,10 @@ import { auth } from '../config/firebase';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeType } from '../themes';
 import { Feather } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next'; // A tradução ainda está aqui
+import { useTranslation } from 'react-i18next'; 
 
 export default function LoginScreen({ navigation }: any) {
-  const { t } = useTranslation(); // O hook t() ainda é usado
+  const { t } = useTranslation(); 
   const { theme } = useTheme();
   const styles = getStyles(theme);
 
@@ -63,7 +62,7 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      {/* O seletor flutuante FOI REMOVIDO daqui */}
+      {/* O seletor flutuante */}
 
       <Text style={styles.title}>{t('login.title')}</Text>
       <TextInput
@@ -110,7 +109,7 @@ export default function LoginScreen({ navigation }: any) {
   );
 }
 
-// Estilos (versão limpa, sem os estilos do seletor)
+// Estilos 
 const getStyles = (theme: ThemeType) =>
   StyleSheet.create({
     container: {

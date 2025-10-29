@@ -14,7 +14,7 @@ import { alarmTag, getTagByPlate } from "../services/api";
 // ---------- Constantes de radar ----------
 const SIZE = 320;
 const R = SIZE / 2;
-// MODIFICADO: Distância máxima representada no radar agora é 8 metros
+
 const MAX_METERS = 8;
 const SWEEP_SPEED_DEG_PER_S = 120;
 
@@ -33,7 +33,7 @@ function angDiff(a:number,b:number){ const d = Math.abs(normAngle(a)-normAngle(b
 function median(a:number[]){ if(!a.length) return NaN; const b=[...a].sort((x,y)=>x-y); const m=Math.floor(b.length/2); return b.length%2? b[m] : (b[m-1]+b[m])/2; }
 function mad(a:number[], m:number){ const d=a.map(v=>Math.abs(v-m)).sort((x,y)=>x-y); const k=Math.floor(d.length/2); return d.length%2? d[k] : (d[k-1]+d[k])/2; }
 
-// Função de distância baseada em tabela (sem alteração, pois os pontos são os mesmos)
+// Função de distância baseada em tabela
 function rssiToMeters(rssi: number | null): number | null {
   if (rssi == null) return null;
 
@@ -42,7 +42,7 @@ function rssiToMeters(rssi: number | null): number | null {
     [-80, 4.5],
     [-70, 3.0],
     [-60, 2.0],
-    [-50, 1.0], // RSSI mais forte: 1 metro. Vamos mapear isso para o primeiro anel de 2m, se necessário.
+    [-50, 1.0], 
   ];
 
   if (rssi >= rssiDistanceMap[rssiDistanceMap.length - 1][0]) {
@@ -229,7 +229,7 @@ export default function RadarProximidade(){
       setRssiRaw(Math.round(device.rssi));
       setRssiSmooth(smooth);
 
-      const d = rssiToMeters(smooth); // Usando a função de distância baseada em tabela
+      const d = rssiToMeters(smooth); 
       
       if (d != null) setMeters(d);
       updateBearingContinuous(smooth);
@@ -265,11 +265,11 @@ export default function RadarProximidade(){
     } catch { Alert.alert("Erro", "Falha ao enviar comando para a TAG."); }
   };
 
-  // MODIFICADO: Blip da moto ajustado para nova MAX_METERS
+ 
   const blip = useMemo(() => {
     if (meters == null) return null;
-    const rRel = clamp(meters / MAX_METERS, 0, 1); // Clamp para 0-1, onde 1 é MAX_METERS
-    const rPx = 8 + rRel * (R - 12); // Pequena margem para o blip não ir totalmente na borda
+    const rRel = clamp(meters / MAX_METERS, 0, 1); 
+    const rPx = 8 + rRel * (R - 12); 
     const angle = bearing ?? 0;
     const x = R + rPx * Math.sin(toRad(angle));
     const y = R - rPx * Math.cos(toRad(angle));
