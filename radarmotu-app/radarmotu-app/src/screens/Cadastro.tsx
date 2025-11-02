@@ -213,7 +213,7 @@ export default function CadastroVeiculo() {
       } else {
          console.log("[Armazenamento] Operação não foi bem sucedida, notificação não será enviada.");
       }
-      // --- FIM ADIÇÃO ---
+     
     }
   } // Fim salvarEArmazenar
 
@@ -269,7 +269,6 @@ const getStyles = (theme: ThemeType) => StyleSheet.create({
   input: { backgroundColor: theme.card, color: theme.text, borderWidth: 1, borderColor: theme.border, paddingHorizontal: 15, paddingVertical: Platform.OS === 'ios' ? 15 : 10, marginBottom: 12, borderRadius: 8, fontSize: 16 },
   placaRecognitionContainer: { marginVertical: 16, alignItems: 'center' },
   button: { backgroundColor: theme.primary, paddingVertical: 14, borderRadius: 8, alignItems: 'center' },
-  // Corrigindo cor do texto do botão salvar (era theme.buttonText, deve ser theme.buttonTextPrimary se o fundo é primary)
   buttonText: { color: theme.buttonTextPrimary, fontSize: 16, fontWeight: 'bold' }, 
   buttonOutline: { backgroundColor: 'transparent', borderColor: theme.primary, borderWidth: 2, paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
   buttonOutlineText: { color: theme.primary, fontSize: 16, fontWeight: 'bold' },

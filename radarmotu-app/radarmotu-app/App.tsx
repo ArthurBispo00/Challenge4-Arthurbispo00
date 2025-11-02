@@ -16,11 +16,11 @@ import { ThemeProvider, useTheme } from "./src/contexts/ThemeContext";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-// --- ADIÇÃO: Imports para Notificações ---
+
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-// --- FIM ADIÇÃO ---
+
 
 // Firebase
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -141,7 +141,7 @@ function MainNavigator() {
         drawerLabelStyle: { fontWeight: 'bold' }
       }}
     >
-      {/* Títulos traduzidos usando o 't' do MainNavigator */}
+      
       <Drawer.Screen name="Home" component={HomeScreen} options={{ title: t('drawerTitles.home') }} />
       <Drawer.Screen name="OperacoesPorPlaca" component={OperacoesPorPlaca} options={{ title: t('drawerTitles.operacoes') }} />
       <Drawer.Screen name="CadastrarVeiculo" component={Cadastro} options={{ title: t('drawerTitles.cadastrar') }} />
@@ -160,7 +160,7 @@ const LoadingScreen = () => (
     </View>
 );
 
-// --- ADIÇÃO: Função para registrar para notificações ---
+// Função para registrar para notificações
 async function registerForPushNotificationsAsync(): Promise<string | undefined> {
   let token;
   if (Platform.OS === 'android') {
@@ -200,7 +200,7 @@ async function registerForPushNotificationsAsync(): Promise<string | undefined> 
   }
   return token;
 }
-// --- FIM ADIÇÃO ---
+
 
 
 // --- Componente App Principal ---
@@ -228,7 +228,7 @@ export default function App() {
       }
     });
     return () => { unsubscribeAuth(); };
-  }, []); // Roda apenas uma vez
+  }, []); 
 
   if (loadingAuth) { return <LoadingScreen />; }
 

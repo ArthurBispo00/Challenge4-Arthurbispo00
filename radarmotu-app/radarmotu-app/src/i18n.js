@@ -2,7 +2,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// REMOVEMOS o RNLocalize
+
 
 // Importe suas traduções
 import ptTranslation from './locales/pt/translation.json';
@@ -18,23 +18,19 @@ const resources = {
   },
 };
 
-// REMOVEMOS o languageDetector
+
 
 i18n
-  // REMOVEMOS o .use(languageDetector)
+  
   .use(initReactI18next) // Passa o i18n para o react-i18next
   .init({
     resources,
-    
-    // ESTA É A MUDANÇA PRINCIPAL:
-    // Força o idioma a ser 'pt'. Isso é instantâneo (síncrono)
-    // e corrige o crash.
     lng: 'pt', 
 
-    fallbackLng: 'pt', // Idioma padrão se a detecção falhar
-    compatibilityJSON: 'v3', // Necessário para React Native
+    fallbackLng: 'pt', 
+    compatibilityJSON: 'v3', 
     interpolation: {
-      escapeValue: false, // React já faz o escape de XSS
+      escapeValue: false, 
     },
     react: {
       useSuspense: false,
