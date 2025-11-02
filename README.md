@@ -111,7 +111,7 @@ Organização e Separação de Responsabilidades: O código-fonte está no diret
 Para uma visão completa da solução em funcionamento, desde o escaneamento da placa até a localização em tempo real com o radar, assista à nossa apresentação e demonstração no YouTube.
 
 > #### 🎥 **[ASSISTIR AO VÍDEO DE DEMONSTRAÇÃO NO YOUTUBE]**
-> **
+> *https://youtu.be/12hrTQhC23U*
 
 ---
 
