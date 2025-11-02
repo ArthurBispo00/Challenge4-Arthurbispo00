@@ -1,8 +1,8 @@
-# 📱 Radar Motu - App de Gestão de Pátio (Entrega Mobile - 2º Semestre)
+# 📱 Radar Motu - App de Gestão de Pátio (Entrega Final - Challenge 4)
 
 ### *Sua frota sob controle, seu pátio na palma da mão.*
 
-GitHub do Projeto: https://github.com/AntonioCarvalhoFIAP/challenge-3-ArthurBispo00?tab=readme-ov-file
+GitHub do Projeto (Classroom): https://github.com/AntonioCarvalhoFIAP/challenge-4-ArthurBispo00
 ---
 
 ## 👨‍💻👩‍💻👩‍💻 Equipe de Desenvolvimento
@@ -20,82 +20,102 @@ GitHub do Projeto: https://github.com/AntonioCarvalhoFIAP/challenge-3-ArthurBisp
 
 ---
 
+# 📲 Baixe e Teste o App (Firebase App Distribution)
+Esta aplicação foi publicada para testes via Firebase App Distribution. Você pode baixar e instalar o build de produção (.apk) diretamente no seu dispositivo Android usando o link de convite (requer ser adicionado como testador).
+
+🔗 https://appdistribution.firebase.google.com/testerapps/1:216057105931:android:4ad50f0f6d2e7a8031410e/releases/063f01r762jvo?utm_source=firebase-console
+
 ## 🎯 Proposta do Aplicativo
 
 Este projeto representa a evolução de um protótipo para um aplicativo funcional em React Native, focado em atender aos requisitos da disciplina de **Mobile Application Development**. A aplicação visa fornecer uma solução completa para a gestão de pátios de motocicletas, transformando a base de desenvolvimento anterior em um produto concreto, com código limpo, integração robusta com APIs e uma interface refinada.
 
-O objetivo é demonstrar a aplicação prática de conceitos avançados de desenvolvimento mobile, incluindo gerenciamento de estado global, comunicação assíncrona com serviços de backend, arquitetura de código escalável e design de interface adaptativo.
+O objetivo é demonstrar a aplicação prática de conceitos avançados de desenvolvimento mobile, incluindo gerenciamento de estado global, comunicação assíncrona, arquitetura escalável e funcionalidades nativas como Notificações Push e Internacionalização
 
 ---
 ## ✅ Atendimento aos Critérios de Avaliação
 
-A seguir, detalhamos como o projeto atende a cada um dos critérios exigidos para a 3ª Sprint.
+Esta seção detalha os novos requisitos implementados para a entrega final (Challenge 4).
 
 | Mapa do Pátio (Visão Geral) | Radar de Proximidade (Localização Fina) |
 | :---: | :---: |
 | ![Demonstração do Mapa do Pátio](./radarmotu-app/radarmotu-app/assets/mapa-do-patio.jpg) | ![Demonstração do Radar de Proximidade](./radarmotu-app/radarmotu-app/assets/radar-de-proximidade.jpg) |
 
-### 1. Telas Funcionais Integradas com API (40 pts)
+### 1. Internacionalização (i18n) e Localização
 
-O aplicativo se conecta a serviços de backend, utilizando Firebase para autenticação e uma **API de OCR própria** para reconhecimento de placas, além de estar preparado para a integração com uma API .NET para operações de dados.
+O aplicativo foi totalmente internacionalizado para suportar múltiplos idiomas, melhorando sua acessibilidade e alcance.
 
-> **a. Duas Funcionalidades Completas com API:** Foram implementadas duas funcionalidades centrais com integração robusta:
-> 1.  **Autenticação de Usuários:** Cadastro, Login e Logout completos via **Firebase Authentication**, com persistência de sessão.
-> 2.  **Reconhecimento de Placa (OCR):** Integração com um **servidor de OCR próprio** ([ArthurBispo00/servidor_OCR](https://github.com/ArthurBispo00/servidor_OCR)) que identifica placas automaticamente em imagens, utilizado nas telas de `Cadastro` e `OperacoesPorPlaca`.
+Suporte a PT/ES: O app agora suporta Português (padrão) e Espanhol.
 
-> **b. Operações Completas (CRUD - em andamento):** As telas de `Cadastro` e `Listagem` foram evoluídas para o consumo de uma **API .NET**. Atualmente, a base para as operações de Criação (Create), Leitura (Read), Atualização (Update) e Exclusão (Delete) de veículos está pronta.
+Troca Dinâmica: Um seletor de idioma (PT | ES) foi adicionado ao menu lateral (Drawer), permitindo ao usuário alterar o idioma de toda a aplicação instantaneamente, sem necessidade de reiniciar.
 
-> **c. Tratamento Completo de Formulários:** Todos os formulários (Login, Cadastro de Usuário e Cadastro de Veículo) possuem tratamento robusto, incluindo:
-> * Validação de campos (ex: formato de e-mail, senha com mínimo de 6 caracteres).
-> * Mensagens de erro claras e informativas para o usuário.
-> * Feedback visual e alertas de sucesso após a conclusão de uma operação.
+Cobertura Completa: Todas as strings visíveis ao usuário (telas, menus, botões, alertas e títulos de navegação) foram migradas para arquivos de tradução (.json) e são gerenciadas pelo i18next.
 
-> **d. Indicadores de Carregamento:** Todas as operações de rede que interagem com as APIs (login, cadastro, busca, etc.) exibem um `ActivityIndicator` (ícone de "loading"). Isso informa ao usuário que uma ação está em andamento, melhorando a experiência de uso.
+### 2. Notificação via Push
 
-### 2. Sistema de Login (20 pts)
+O aplicativo implementa um ciclo completo de envio e recepção de notificações push, utilizando Expo Push Notifications e Firebase Cloud Messaging (FCM).
 
-O fluxo de autenticação foi implementado de forma completa e segura, utilizando **Firebase Authentication**, uma das opções recomendadas, garantindo persistência de sessão e proteção de dados.
+Cenário Realista Implementado: Foi implementado um cenário de notificação automático e relevante ao contexto do app.
 
-> **a. Tela de Login:** Uma tela dedicada permite que usuários existentes acessem o aplicativo. A sessão é gerenciada pelo Firebase e persistida automaticamente, ou seja, o usuário permanece logado ao reabrir o app.
+Envio Automático: Após o usuário cadastrar um novo veículo ou armazenar um veículo (nas telas Cadastro.tsx ou OperacoesPorPlaca.tsx), o aplicativo obtém seu próprio Push Token (compartilhado via Context API) e dispara uma chamada para a API da Expo, enviando uma notificação push para o próprio dispositivo.
 
-> **b. Tela de Cadastro:** Uma tela separada permite que novos usuários criem uma conta. Os dados são enviados ao Firebase para gerenciamento seguro das credenciais.
+Mensagem de Confirmação: A notificação serve como uma confirmação da ação (ex: "Veículo Cadastrado: Veículo X placa Y cadastrado com sucesso.").
 
-> **c. Logout Funcional:** Um botão de "Sair" (Logout) está presente na tela "Sobre Nós" e também no menu lateral (Drawer). Ao ser acionado, ele encerra a sessão do Firebase e redireciona o usuário para a tela de Login, limpando o histórico de navegação.
+Recepção (Foreground): O app está configurado (setNotificationHandler) para exibir o banner da notificação mesmo que o usuário esteja com o app aberto (em primeiro plano) no momento do cadastro.
 
-### 3. Estilização com Tema (15 pts)
+### 3. Publicação do App (Firebase App Distribution)
 
-O aplicativo possui um sistema de tema robusto, flexível e visualmente consistente, adaptando-se às preferências do usuário.
+O aplicativo foi configurado para builds de produção e distribuído via Firebase App Distribution, atendendo aos requisitos de publicação para testes.
 
-> **a. Modo Claro e Escuro:** O app utiliza o hook `useColorScheme` do React Native para detectar a preferência de tema do sistema operacional e inicia com o tema correto (claro ou escuro). Adicionalmente, um botão na tela "Sobre Nós" permite ao usuário alternar manualmente entre os modos a qualquer momento.
+Build de Produção: O build final foi gerado como um .apk assinado através do EAS Build (eas build --profile production).
 
-> **b. Personalização Consistente:** Através da Context API do React (`ThemeContext`), um objeto de tema centralizado distribui as paletas de cores e estilos para todas as telas, garantindo uma identidade visual coesa e uniforme com a marca "Radar Motu".
+Hospedagem: O .apk foi publicado na plataforma Firebase App Distribution.
 
-> **c. Adesão às Guidelines e Criatividade:** A interface emprega componentes e espaçamentos que seguem as boas práticas de design (Material Design para Android), apresentando botões, campos de texto e cartões bem definidos, ao mesmo tempo que mantém a identidade visual única e criativa do projeto.
+Gerenciamento de Testadores: O e-mail do professor foi adicionado à lista de testadores, permitindo o download e a verificação do build de produção entregue. (Obs: A tela "Sobre" com hash do commit foi pulada a pedido para focar na publicação.)
 
-### 4. Arquitetura de Código (15 pts)
+### 4. Histórico: Atendimento aos Critérios (3ª Sprint Intermediária)
+
+A seguir, detalhamos como o projeto atendeu a cada um dos critérios exigidos para a 3ª Sprint.
 
 O projeto foi estruturado com foco em clareza, manutenibilidade, separação de responsabilidades e utilizando as melhores práticas do desenvolvimento mobile.
 
-> **Organização e Separação de Responsabilidades:** Todo o código-fonte está encapsulado no diretório `src/`. As responsabilidades são claramente divididas em subpastas: `screens` (telas completas), `components` (componentes reutilizáveis), `contexts` (gerenciamento de estado global como Tema e Autenticação), `navigation` (lógica de navegação e tipagens), `services` (camada de abstração de API) e `themes` (definições de estilos e cores).
+#### 4.1  Telas Funcionais Integradas com API
+a. Duas Funcionalidades Completas com API:
 
-> **Código Limpo e Boas Práticas:** A aplicação faz uso extensivo de Hooks do React, componentes funcionais e da Context API para um gerenciamento de estado limpo. A lógica de comunicação com a API é isolada na camada de `services`, e a navegação condicional (Login/App Principal) é orquestrada no `App.tsx`, demonstrando uma arquitetura bem planejada e elegante.
+ Autenticação de Usuários: Cadastro, Login e Logout completos via Firebase Authentication.
 
-### 5. Documentação e Apresentação (10 pts)
+ Reconhecimento de Placa (OCR): Integração com um servidor de OCR próprio (ArthurBispo00/servidor_OCR).
+
+b. Operações Completas (CRUD - em andamento): As telas de Cadastro e Listagem foram evoluídas para o consumo de uma API .NET (ou similar).
+
+c. Tratamento Completo de Formulários: Todos os formulários (Login, Cadastro de Usuário e Veículo) possuem validação, mensagens de erro e feedback.
+
+d. Indicadores de Carregamento: Todas as operações de rede (ActivityIndicator) informam o usuário que uma ação está em andamento.
+
+#### 4.2 Sistema de Login 
+O fluxo de autenticação foi implementado de forma completa e segura, utilizando Firebase Authentication. a. Tela de Login: Gerencia a sessão do Firebase e persiste o login. b. Tela de Cadastro: Permite que novos usuários criem uma conta. c. Logout Funcional: Presente no menu lateral (Drawer) e na tela "Sobre", encerra a sessão do Firebase e redireciona para o Login.
+
+#### 4.3 Estilização com Tema 
+a. Modo Claro e Escuro: O app detecta o tema do sistema e permite a troca manual. b. Personalização Consistente: Através da Context API (ThemeContext), um objeto de tema centralizado distribui as paletas de cores e estilos. c. Adesão às Guidelines e Criatividade: A interface segue boas práticas de design (Material Design) e mantém a identidade visual do projeto.
+
+#### 4.4 Arquitetura de Código
+Organização e Separação de Responsabilidades: O código-fonte está no diretório src/, dividido em: screens, components, contexts, navigation, services e themes. Código Limpo e Boas Práticas: Uso de Hooks, componentes funcionais, Context API e separação da lógica de navegação condicional no App.tsx.
+
+### 5. Documentação e Apresentação
 
 > **README.md:** Este arquivo serve como a documentação técnica central do projeto, detalhando a proposta, as funcionalidades, a estrutura de pastas, as tecnologias utilizadas e os integrantes, atendendo a todos os requisitos.
 
 ---
 
-## 4. Demonstração em Vídeo
+### 6. Demonstração em Vídeo
 
 Para uma visão completa da solução em funcionamento, desde o escaneamento da placa até a localização em tempo real com o radar, assista à nossa apresentação e demonstração no YouTube.
 
-> ### 🎥 **[ASSISTIR AO VÍDEO DE DEMONSTRAÇÃO NO YOUTUBE]**
-> *https://www.youtube.com/shorts/K9956kkluGk*
+> #### 🎥 **[ASSISTIR AO VÍDEO DE DEMONSTRAÇÃO NO YOUTUBE]**
+> **
 
 ---
 
-## 5. Tecnologias Utilizadas
+### 5. Tecnologias Utilizadas
 
 Este projeto foi construído com uma combinação de tecnologias modernas e eficientes, focadas no desenvolvimento mobile em React Native e na integração com serviços de backend.
 
@@ -154,6 +174,7 @@ radarmotu-app/
 ├── src/                # Diretório principal do CÓDIGO-FONTE da aplicação.
 │   ├── components/     # Componentes de UI genéricos e reutilizáveis (ex: botões, cards).
 │   ├── config/         # Configurações de serviços (ex: Firebase e .env).
+│   ├── locales/        # Arquivos de tradução (pt/translation.json, es/translation.json).
 │   ├── contexts/       # Gerenciadores de estado global (Tema, Autenticação).
 │   ├── navigation/     # Lógica de navegação e definição de tipos das rotas.
 │   ├── screens/        # Componentes que representam as telas completas do app.
@@ -161,23 +182,11 @@ radarmotu-app/
 │   └── themes/         # Definição dos temas (claro/escuro).
 │
 ├── App.tsx             # Ponto de entrada. Responsável por carregar os provedores e a navegação.
-└── package.json        # Lista de dependências e scripts do projeto.
+├── package.json        # Lista de dependências e scripts do projeto.
+├── eas.json            # Configuração do EAS Build (ex: legacy-peer-deps, buildType: apk).
+├── google-services.json # Chaves do Firebase para serviços nativos (Push, Auth).
+
 ```
-Detalhamento das Responsabilidades
-
-src/: É o coração da aplicação. Todo o código que escrevemos (telas, componentes, lógica, serviços) vive aqui dentro, completamente isolado das configurações de alto nível do projeto.
-
-screens/: Contém as telas completas que o usuário vê. Cada arquivo é uma "página" do app.
-
-components/: Guarda os "blocos de montar" reutilizáveis, garantindo consistência visual e evitando código repetido.
-
-contexts/: Gerencia o estado global, como o tema atual (claro/escuro) e o status de login do usuário, disponibilizando essas informações para todo o app.
-
-navigation/: Centraliza toda a lógica de navegação, incluindo a definição dos navegadores (Drawer, Stack) e os tipos de cada rota (types.ts).
-
-services/: Camada responsável pela comunicação com o mundo exterior, como o Firebase ou a API .NET.
-
-App.tsx: Agora é um arquivo extremamente limpo, com a única responsabilidade de inicializar os contextos globais e o sistema de navegação.
 
 ## 7. Como Rodar o Projeto do Zero
 
